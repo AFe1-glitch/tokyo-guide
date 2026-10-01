@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#1b2a41">
 <meta name="format-detection" content="telephone=no">
-<title>东京旅行攻略 · 实用向</title>
+<title>日本旅游攻略 · 实用向</title>
+
+<!-- Leaflet（交互地图） -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   :root{
-    --bg:#f7f5f2; --card:#ffffff; --ink:#1f2430; --sub:#6b7280;
+    --bg:#f7f5f2; --card:#fff; --ink:#1f2430; --sub:#6b7280;
     --line:#e6e2dc; --accent:#c9455c; --accent2:#2f6f8f;
     --ok:#2e9e6b; --warn:#d98324; --shadow:0 2px 10px rgba(31,36,48,.07);
   }
@@ -16,191 +19,253 @@
   html{-webkit-text-size-adjust:100%}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC","Hiragino Sans GB",sans-serif;
-    background:var(--bg); color:var(--ink); line-height:1.75; font-size:15px;
-    overflow-x:hidden;
+    background:var(--bg);color:var(--ink);line-height:1.75;font-size:15px;overflow-x:hidden;
   }
   a{color:var(--accent2);text-decoration:none}
   img,table{max-width:100%}
 
-  /* ---------- 头部 ---------- */
   header{
-    background:linear-gradient(135deg,#1b2a41 0%,#2d4a63 55%,#c9455c 100%);
-    color:#fff; padding:44px 20px 34px; position:relative; overflow:hidden;
-  }
-  header::after{
-    content:""; position:absolute; inset:0;
-    background:radial-gradient(circle at 82% 18%, rgba(255,255,255,.18), transparent 42%);
-    pointer-events:none;
-  }
+    color:#fff;position:relative;overflow:hidden;padding:52px 20px 42px;
+    background:#16324a url('images/hero-fuji.jpg') center 32% / cover no-repeat}
+  header::before{content:"";position:absolute;inset:0;z-index:0;
+    background:linear-gradient(100deg,
+      rgba(12,26,42,.92) 0%,
+      rgba(14,30,48,.84) 32%,
+      rgba(16,34,54,.60) 55%,
+      rgba(20,40,62,.34) 76%,
+      rgba(24,46,70,.24) 100%)}
+  header::after{content:"";position:absolute;inset:0;z-index:0;
+    background:linear-gradient(180deg,rgba(10,22,36,.34) 0%,rgba(10,22,36,0) 42%,rgba(10,22,36,.42) 100%)}
+  header .wrap{position:relative;z-index:1}
   header .wrap{max-width:1040px;margin:0 auto;position:relative;z-index:1}
-  header .flag{display:inline-flex;align-items:center;gap:10px;
-    font-size:12px;letter-spacing:.14em;opacity:.9;margin-bottom:14px}
+  header .flag{display:inline-flex;align-items:center;gap:10px;font-size:12px;
+    letter-spacing:.14em;opacity:.9;margin-bottom:14px}
   header .flag .dot{width:20px;height:20px;border-radius:50%;
     background:radial-gradient(circle,#e03a4e 0 42%,#fff 42% 100%);box-shadow:0 0 0 1px rgba(255,255,255,.4)}
   header h1{font-size:26px;line-height:1.3;font-weight:700;letter-spacing:-.01em}
   header p{margin-top:10px;font-size:14px;opacity:.92}
   header .meta{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
   header .meta span{font-size:12px;padding:5px 11px;border-radius:999px;
-    background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);
-    -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+    background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22)}
 
-  /* ---------- 导航（移动端横向滑动） ---------- */
-  nav{
-    position:sticky;top:0;z-index:50;background:rgba(247,245,242,.94);
-    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
-    border-bottom:1px solid var(--line);
-  }
-  nav .wrap{
-    max-width:1040px;margin:0 auto;padding:0 12px;display:flex;gap:2px;
-    overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
-  }
+  nav{position:sticky;top:0;z-index:50;background:rgba(247,245,242,.94);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  nav .wrap{max-width:1040px;margin:0 auto;padding:0 12px;display:flex;gap:2px;
+    overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   nav .wrap::-webkit-scrollbar{display:none}
-  nav button{
-    background:none;border:none;cursor:pointer;font:inherit;font-size:14px;
-    padding:14px 13px;color:var(--sub);border-bottom:2.5px solid transparent;
-    white-space:nowrap;flex:0 0 auto;scroll-snap-align:start;
-    transition:color .15s,border-color .15s;
-  }
+  nav button{background:none;border:none;cursor:pointer;font:inherit;font-size:14px;
+    padding:14px 13px;color:var(--sub);border-bottom:2.5px solid transparent;white-space:nowrap;flex:0 0 auto}
   nav button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
 
-  /* ---------- 内容 ---------- */
   main{max-width:1040px;margin:0 auto;padding:22px 16px 70px}
   section{display:none;animation:fade .26s ease}
   section.on{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-  h2{font-size:21px;margin-bottom:6px;letter-spacing:-.01em;line-height:1.35}
-  h2 + .lead{color:var(--sub);font-size:13.5px;margin-bottom:22px}
+  h2{font-size:21px;margin-bottom:6px;line-height:1.35}
+  h2 + .lead{color:var(--sub);font-size:13.5px;margin-bottom:20px}
   h3{font-size:16px;margin:26px 0 10px;display:flex;align-items:center;gap:8px;line-height:1.4}
   h3::before{content:"";width:4px;height:15px;border-radius:2px;background:var(--accent);flex:0 0 auto}
 
-  .card{
-    background:var(--card);border:1px solid var(--line);border-radius:14px;
-    padding:17px 17px;box-shadow:var(--shadow);margin-bottom:14px;
-  }
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:17px;box-shadow:var(--shadow);margin-bottom:14px}
   .grid{display:grid;gap:14px}
   ul{margin-left:19px}
-  li{margin-bottom:2px}
 
-  /* ---------- 清单（移动端大点击区） ---------- */
+  /* ============ 地图 ============ */
+  .map-tools{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;align-items:center}
+  .chip{font-size:12.5px;padding:6px 13px;border-radius:999px;border:1px solid var(--line);
+    background:#fff;color:var(--sub);cursor:pointer;white-space:nowrap;transition:all .15s;font:inherit;font-size:12.5px}
+  .chip:hover{border-color:#c9c4bc}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .map-hint{font-size:12px;color:var(--sub);margin-left:auto}
+
+  .map-box{position:relative;background:#dbe7ef;border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;box-shadow:var(--shadow);touch-action:none}
+  .map-box svg{display:block;width:100%;height:auto;cursor:grab}
+  .map-box svg.grabbing{cursor:grabbing}
+  .mb-land .jp{fill:#2f4f6b;stroke:#5b8bb0;stroke-width:1.1}
+  .mb-land .nb{fill:#b9c3cd;stroke:#d3dae1;stroke-width:.9}
+  .mb-grid{stroke:#c3d6e2;stroke-width:.6;fill:none}
+  .mb-grid-t{stroke:#aac4d4;stroke-width:1;fill:none}
+
+  .mk{cursor:pointer}
+  .mk circle.hit{fill:transparent;r:14}
+  .mk circle.dot{fill:#c9455c;stroke:#fff;stroke-width:2.2;transition:all .15s}
+  .mk text{font-size:13px;fill:#fff;font-weight:700;text-anchor:middle;pointer-events:none;
+    font-family:"Microsoft YaHei",sans-serif}
+  .mk:hover circle.dot{fill:#e0566e;r:11}
+  .mk.sel circle.dot{fill:#f0a020;stroke:#fff;stroke-width:3}
+  .mk.hide{display:none}
+
+  .map-ctl{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px;z-index:5}
+  .map-ctl button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+    background:rgba(255,255,255,.94);font-size:17px;cursor:pointer;line-height:1;
+    box-shadow:0 2px 8px rgba(31,36,48,.12);color:var(--ink)}
+  .map-ctl button:active{background:#f0eee9}
+
+  .spot-panel{margin-top:14px}
+  .spot-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .spot-head .rg{font-size:12px;padding:2px 9px;border-radius:999px;background:#eef3f6;
+    color:var(--accent2);border:1px solid #dbe6ec}
+  .spot-head h4{font-size:17px}
+  .spot-panel .desc{color:var(--sub);font-size:14px}
+
+  /* 列表 */
+  .rg-group{margin-bottom:16px}
+  .rg-group h4{font-size:14px;color:var(--accent);margin-bottom:8px;letter-spacing:.02em}
+  .rg-group .items{display:flex;flex-wrap:wrap;gap:7px}
+  .item{font-size:13px;padding:6px 12px;border-radius:9px;border:1px solid var(--line);
+    background:#fff;cursor:pointer;transition:all .15s}
+  .item:hover{border-color:var(--accent);color:var(--accent)}
+  .item.sel{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+
+  /* 清单 */
   .check{list-style:none;margin-left:0}
-  .check li{
-    display:flex;gap:11px;align-items:flex-start;padding:11px 4px;
-    border-bottom:1px dashed var(--line);cursor:pointer;border-radius:8px;
-    transition:background .15s;
-  }
+  .check li{display:flex;gap:11px;align-items:flex-start;padding:11px 4px;
+    border-bottom:1px dashed var(--line);cursor:pointer;border-radius:8px}
   .check li:active{background:#f4f1ec}
   .check li:last-child{border-bottom:none}
-  .check .box{
-    flex:0 0 21px;width:21px;height:21px;margin-top:2px;border-radius:6px;
-    border:1.8px solid #c9c4bc;display:flex;align-items:center;justify-content:center;
-    transition:background .15s,border-color .15s;
-  }
+  .check .box{flex:0 0 21px;width:21px;height:21px;margin-top:2px;border-radius:6px;
+    border:1.8px solid #c9c4bc;display:flex;align-items:center;justify-content:center;transition:all .15s}
   .check li.done .box{background:var(--ok);border-color:var(--ok)}
   .check li.done .box::after{content:"";width:5px;height:10px;border:solid #fff;
     border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-2px)}
   .check li.done .txt{color:#9aa1ab;text-decoration:line-through}
-  .check .txt small{display:block;color:var(--sub);font-size:12.5px;
-    text-decoration:none;margin-top:2px;line-height:1.6}
+  .check .txt small{display:block;color:var(--sub);font-size:12.5px;text-decoration:none;margin-top:2px}
 
-  /* ---------- 表格：移动端转卡片 ---------- */
   table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
   th,td{text-align:left;padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}
-  th{font-size:12px;color:var(--sub);font-weight:600;letter-spacing:.02em;background:#fbfaf8}
+  th{font-size:12px;color:var(--sub);font-weight:600;background:#fbfaf8}
   tr:last-child td{border-bottom:none}
   td:first-child{font-weight:600}
 
-  /* ---------- 标签 ---------- */
-  .tag{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:999px;margin-right:6px;
-    background:#eef3f6;color:var(--accent2);border:1px solid #dbe6ec}
-
-  /* ---------- 提示框 ---------- */
-  .note{border-left:3px solid var(--accent);background:#fdf5f7;
-    padding:13px 15px;border-radius:0 10px 10px 0;margin:14px 0;font-size:13.5px;line-height:1.75}
+  .note{border-left:3px solid var(--accent);background:#fdf5f7;padding:13px 15px;
+    border-radius:0 10px 10px 0;margin:14px 0;font-size:13.5px}
   .note.warn{border-color:var(--warn);background:#fdf8f1}
   .note.ok{border-color:var(--ok);background:#f2faf6}
   .note b{display:block;margin-bottom:4px}
 
-  /* ---------- 预算计算器 ---------- */
   .calc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
     padding:11px 0;border-bottom:1px dashed var(--line)}
   .calc-row:last-of-type{border-bottom:none}
-  .calc-row label{flex:1;font-size:14px;line-height:1.5}
-  .calc-row input[type=number]{
-    width:104px;padding:10px 11px;border:1px solid var(--line);border-radius:9px;
-    font:inherit;font-size:16px;text-align:right;background:#fbfaf8;
-    -webkit-appearance:none;appearance:none;
-  }
-  .calc-row input[type=number]:focus{outline:2px solid #cfe0ea;border-color:var(--accent2)}
-  .total{
-    margin-top:14px;padding:15px 17px;border-radius:12px;
+  .calc-row label{flex:1;font-size:14px}
+  .calc-row input[type=number]{width:104px;padding:10px 11px;border:1px solid var(--line);
+    border-radius:9px;font:inherit;font-size:16px;text-align:right;background:#fbfaf8;-webkit-appearance:none}
+  .total{margin-top:14px;padding:15px 17px;border-radius:12px;
     background:linear-gradient(135deg,#1b2a41,#2d4a63);color:#fff;
-    display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;
-  }
-  .total .num{font-size:25px;font-weight:700;letter-spacing:-.02em}
+    display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .total .num{font-size:25px;font-weight:700}
   .total small{opacity:.8;font-size:12px}
 
-  /* ---------- 日语卡 ---------- */
-  .phrase{display:flex;justify-content:space-between;gap:12px;
-    padding:12px 0;border-bottom:1px dashed var(--line);align-items:baseline}
+  .phrase{display:flex;justify-content:space-between;gap:12px;padding:12px 0;
+    border-bottom:1px dashed var(--line);align-items:baseline}
   .phrase:last-child{border-bottom:none}
-  .phrase .jp{font-size:16.5px;font-weight:600;letter-spacing:.01em}
+  .phrase .jp{font-size:16.5px;font-weight:600}
   .phrase .ro{font-size:12px;color:var(--sub);font-style:italic}
   .phrase .cn{font-size:13px;color:var(--sub);text-align:right;flex-shrink:0;max-width:46%}
 
-  /* ---------- 时间轴 ---------- */
+  /* ============ Leaflet 地图 ============ */
+  #leafletMap{height:62vh;min-height:420px;border-radius:14px;
+    border:1px solid var(--line);box-shadow:var(--shadow);z-index:1}
+  .leaflet-container{font:inherit;background:#dbe7ef}
+  .leaflet-popup-content{font-size:13.5px;line-height:1.65;margin:11px 13px}
+  .leaflet-popup-content b{font-size:14.5px;display:block;margin-bottom:3px}
+  .leaflet-popup-content .rg{font-size:11.5px;color:var(--accent2);display:block;margin-bottom:5px}
+  .leaflet-bar a{font-size:19px;line-height:29px}
+  .map-note{font-size:12px;color:var(--sub);margin-top:9px;line-height:1.7}
+  .lyr{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .lyr button{font-size:12.5px;padding:6px 12px;border-radius:9px;border:1px solid var(--line);
+    background:#fff;cursor:pointer;font:inherit;font-size:12.5px;color:var(--sub)}
+  .lyr button.on{background:var(--accent2);border-color:var(--accent2);color:#fff;font-weight:600}
+
+  /* 自定义标记 */
+  .pin{width:22px;height:22px;border-radius:50% 50% 50% 0;background:var(--accent);
+    border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);
+    transform:rotate(-45deg);display:flex;align-items:center;justify-content:center}
+  .pin b{transform:rotate(45deg);color:#fff;font-size:10.5px;font-weight:700;
+    font-family:"Microsoft YaHei",sans-serif}
+  .pin.small{width:15px;height:15px;border-width:2px}
+  .pin.sel{background:#f0a020;width:26px;height:26px}
+
+  /* 小号标记（每个景点一个点） */
+  .pin.s{width:17px;height:17px;border-width:2px;box-shadow:0 1px 4px rgba(0,0,0,.38)}
+  .pin.s.sel{background:#f0a020;width:23px;height:23px}
+
+  /* 弹窗照片 */
+  .pw{width:236px;border-radius:9px;overflow:hidden;margin:0 0 8px;background:#f0eee9}
+  .pw img{width:100%;height:152px;object-fit:cover;display:block}
+  .pc{font-size:10.5px;color:#a8a29a;text-align:right;margin-top:3px}
+  .pact{display:inline-block;margin-top:9px;font-size:12.5px;color:var(--accent2);text-decoration:none}
+  .leaflet-popup-content{margin:12px 14px 13px}
+  .leaflet-popup-content .rg{font-size:11.5px;color:var(--accent2);display:block;margin-bottom:4px}
+  .leaflet-popup-content b{font-size:15px;display:block;margin-bottom:4px}
+  .leaflet-popup-content .ds2{color:#6b7280;font-size:13px;line-height:1.65;display:block}
+
+  /* ============ 搜索框 ============ */
+  .search-wrap{position:relative;margin-bottom:12px}
+  #q{width:100%;padding:12px 40px 12px 15px;border:1px solid var(--line);border-radius:12px;
+    font:inherit;font-size:16px;background:#fff;box-shadow:var(--shadow);outline:none;
+    -webkit-appearance:none}
+  #q:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(47,111,143,.12)}
+  #q::placeholder{color:#a8a29a}
+  .search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    border:none;background:#f0eee9;color:var(--sub);width:24px;height:24px;border-radius:50%;
+    cursor:pointer;font-size:14px;line-height:1;display:none;align-items:center;justify-content:center}
+  .search-clear.on{display:flex}
+  .results{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;
+    border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 26px rgba(31,36,48,.16);
+    max-height:340px;overflow-y:auto;z-index:1200;display:none}
+  .results.on{display:block}
+  .res{display:flex;justify-content:space-between;gap:12px;padding:11px 15px;
+    cursor:pointer;border-bottom:1px solid #f2efea;align-items:baseline}
+  .res:last-child{border-bottom:none}
+  .res:hover,.res.act{background:#f7f5f2}
+  .res .nm{font-size:14px;font-weight:600}
+  .res .rg2{font-size:12px;color:var(--accent2);flex-shrink:0}
+  .res .ds{font-size:12px;color:var(--sub);display:block;font-weight:400;margin-top:2px}
+  .res-empty{padding:16px;text-align:center;color:var(--sub);font-size:13.5px}
+
   .day{position:relative;padding-left:26px;margin-bottom:20px}
   .day::before{content:"";position:absolute;left:6px;top:8px;bottom:-12px;width:2px;background:var(--line)}
   .day:last-child::before{display:none}
   .day .pt{position:absolute;left:0;top:5px;width:14px;height:14px;border-radius:50%;
     background:#fff;border:3px solid var(--accent)}
-  .day h4{font-size:15.5px;margin-bottom:3px;line-height:1.45}
-  .day .when{font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.02em}
+  .day h4{font-size:15.5px;margin-bottom:3px}
+  .day .when{font-size:12px;color:var(--accent);font-weight:600}
 
   footer{border-top:1px solid var(--line);padding:22px 20px 30px;text-align:center;
     color:var(--sub);font-size:12px;line-height:1.8}
   .kbd{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;background:#f0eee9;
     padding:1px 6px;border-radius:5px;border:1px solid var(--line);white-space:nowrap}
-
-  /* ---------- 回到顶部 ---------- */
-  #top{
-    position:fixed;right:16px;bottom:20px;z-index:60;
-    width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
-    background:rgba(255,255,255,.92);color:var(--ink);font-size:18px;
-    box-shadow:0 4px 14px rgba(31,36,48,.16);cursor:pointer;
-    display:none;align-items:center;justify-content:center;
-    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  }
+  #top{position:fixed;right:16px;bottom:20px;z-index:60;width:44px;height:44px;border-radius:50%;
+    border:1px solid var(--line);background:rgba(255,255,255,.92);color:var(--ink);font-size:18px;
+    box-shadow:0 4px 14px rgba(31,36,48,.16);cursor:pointer;display:none;align-items:center;justify-content:center}
   #top.show{display:flex}
 
-  /* ================= 平板及以上 ================= */
   @media(min-width:700px){
-    body{font-size:15px}
     header{padding:52px 24px 40px}
     header h1{font-size:34px}
     header p{font-size:15px;max-width:640px}
-    header .flag{font-size:13px}
-    header .meta span{font-size:12.5px;padding:5px 12px}
     nav .wrap{padding:0 24px;gap:4px}
     nav button{font-size:14.5px;padding:15px 16px}
     main{padding:34px 24px 90px}
     h2{font-size:23px}
-    h2 + .lead{font-size:14px;margin-bottom:26px}
     h3{font-size:16.5px;margin:30px 0 12px}
     .card{padding:20px 22px;margin-bottom:16px}
     .grid{gap:16px}
     .g2{grid-template-columns:1fr 1fr}
-    .g3{grid-template-columns:repeat(3,1fr)}
     .note{padding:14px 18px;font-size:14px}
-    .phrase .jp{font-size:16px}
     .day{padding-left:30px}
     .day::before{left:8px}
     .day .pt{left:2px}
     .calc-row input[type=number]{width:92px;font-size:14px;padding:7px 10px}
   }
-
-  /* ================= 小屏专项修正 ================= */
+  @media(max-width:700px){
+    header{background-position:62% 34%}
+    header::before{background:linear-gradient(180deg,
+      rgba(12,26,42,.90) 0%,rgba(12,26,42,.78) 60%,rgba(12,26,42,.66) 100%)}
+  }
   @media(max-width:400px){
     header h1{font-size:23px}
     main{padding:18px 13px 70px}
@@ -210,6 +275,7 @@
     .total .num{font-size:22px}
     .phrase{flex-direction:column;gap:3px;align-items:flex-start}
     .phrase .cn{text-align:left;max-width:100%}
+    .map-hint{display:none}
   }
 </style>
 </head>
@@ -217,14 +283,14 @@
 
 <header>
   <div class="wrap">
-    <div class="flag"><span class="dot"></span>JAPAN · TOKYO</div>
-    <h1>东京实用攻略<br>给第一次去、又不想踩坑的人</h1>
-    <p>不堆景点清单。这里写的是「到了才发现」的那些事：支付怎么搞、地铁怎么坐不迷路、哪里必须带现金、一天到底能走多少路。</p>
+    <div class="flag"><span class="dot"></span>JAPAN · 日本全国</div>
+    <h1>日本旅游攻略<br>给第一次去、又不想踩坑的人</h1>
+    <p>不堆景点清单。这里有可缩放到街道级的日本地图、41 个著名景点标注，以及「到了才发现」的实用经验：支付、交通、免税、走路量。</p>
     <div class="meta">
+      <span>🗾 41 个景点地图</span>
       <span>💴 现金仍必要</span>
       <span>🚇 交通卡是刚需</span>
       <span>🚶 日均 1.5–2 万步</span>
-      <span>🛍️ 免税满 5000 日元</span>
     </div>
   </div>
 </header>
@@ -233,8 +299,39 @@
 
 <main>
 
-  <!-- ============ 出发前 ============ -->
-  <section id="prep" class="on">
+  <!-- ================= 地图 ================= -->
+  <section id="map" class="on">
+    <h2>日本景点地图</h2>
+    <p class="lead">可放大到街道级别 · 每个景点独立标记 · 支持搜索与卫星图</p>
+
+    <div class="search-wrap">
+      <input id="q" type="search" placeholder="搜索景点，如：富士山 / 清水寺 / 冲绳" autocomplete="off">
+      <button class="search-clear" id="qclear" aria-label="清空">✕</button>
+      <div class="results" id="results"></div>
+    </div>
+
+    <div class="map-tools" id="chips"></div>
+
+    <div id="leafletMap"></div>
+
+    <div class="lyr" id="layers">
+      <button data-l="street" class="on">街道图</button>
+      <button data-l="sat">卫星图</button>
+    </div>
+
+    <p class="map-note">
+      🗺️ 地图瓦片来自 <b>Esri</b>（真实街道数据，可放大到路口）。照片来自 <b>维基百科 / 维基共享资源</b>（开放版权）。
+      <b>需要联网</b>才能加载地图底图；离线时下面的景点列表仍可正常使用。
+    </p>
+
+    <div class="card">
+      <h3 style="margin-top:0">按地区浏览</h3>
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <!-- ================= 出发前 ================= -->
+  <section id="prep">
     <h2>出发前要办的</h2>
     <p class="lead">按顺序做，最省事。点一下打勾，会自动记住。</p>
 
@@ -258,73 +355,75 @@
           <li><span class="box"></span><span class="txt">充电宝（随身，不能托运）<small>容量 ≤ 100Wh 可带上飞机</small></span></li>
           <li><span class="box"></span><span class="txt">舒适的鞋<small>这条最重要，见「交通」里的走路量</small></span></li>
           <li><span class="box"></span><span class="txt">小垃圾袋<small>街上几乎找不到垃圾桶，垃圾自己带走</small></span></li>
-          <li><span class="box"></span><span class="txt">常用药<small>感冒药、肠胃药，日本买药要沟通，不方便</small></span></li>
+          <li><span class="box"></span><span class="txt">常用药<small>日本买药要沟通，不方便</small></span></li>
         </ul>
       </div>
     </div>
 
     <div class="note warn">
       <b>⚠️ 关于"地铁 24 小时券"</b>
-      Tokyo Subway Ticket（24/48/72 小时）只覆盖 <b>东京 Metro + 都营地下铁</b>，
-      <b>不含 JR</b>。而山手线（JR）是绕城最常用的线路。所以买之前先想清楚行程要不要坐 JR——
+      Tokyo Subway Ticket（24/48/72 小时）只覆盖 <b>东京 Metro + 都营地下铁</b>，<b>不含 JR</b>。
+      而山手线（JR）是绕城最常用的线路。买之前先想清楚行程要不要坐 JR——
       很多人买了券却发现主要靠 JR 移动，反而不划算。
+    </div>
+
+    <div class="note">
+      <b>💡 去关西也一样</b>
+      大阪、京都各有自己的地铁/巴士一日券，逻辑相同：<b>先看你要不要坐 JR，再决定买不买券</b>。
+      关西还有「关西周游卡」这类跨城市票券，适合大阪–京都–奈良–神户连线。
     </div>
   </section>
 
-  <!-- ============ 交通 ============ -->
+  <!-- ================= 交通 ================= -->
   <section id="traffic">
     <h2>交通：搞懂这三件事就够了</h2>
-    <p class="lead">东京地铁不难，难的是"不同公司、不同闸机、不同票价体系"。</p>
+    <p class="lead">日本的铁路不难，难的是"不同公司、不同闸机、不同票价体系"。</p>
 
     <div class="card">
-      <h3 style="margin-top:0">① 交通卡（Suica / PASMO）</h3>
+      <h3 style="margin-top:0">① 交通卡（Suica / ICOCA / PASMO）</h3>
       <p>这是最重要的东西。<b>刷卡进站、刷卡出站、自动扣费</b>，还能在便利店买东西。</p>
       <ul style="margin:12px 0 0 20px">
         <li><b>iPhone 用户</b>：直接在「钱包」App 里加 Suica，用 Apple Pay 充值，最优解</li>
         <li><b>安卓用户</b>：视机型支持情况，多数需到车站买实体卡（约 500 日元押金）</li>
-        <li>实体卡余额不足时，站内有「精算机」（补票机）可现场充值</li>
+        <li>关西用 <b>ICOCA</b>，但全国主要 IC 卡基本互通，不用纠结</li>
+        <li>余额不足时，站内有「精算机」（补票机）可现场充值</li>
       </ul>
-      <div class="note ok" style="margin-bottom:0">
-        <b>💡 实在没有卡也行</b>
-        直接买单程票，或用 iPhone 的 Suica。短期游客不一定非要纠结实体卡。
-      </div>
     </div>
 
     <div class="card">
-      <h3 style="margin-top:0">② 三家不同的公司</h3>
+      <h3 style="margin-top:0">② 铁路公司怎么分</h3>
       <table>
-        <tr><th>公司</th><th>代表线路</th><th>说明</th></tr>
-        <tr><td>JR（日本铁路）</td><td>山手线、中央线</td><td>绕城主力。山手线是个环，串起新宿/涩谷/东京/上野</td></tr>
-        <tr><td>东京 Metro</td><td>银座线、丸之内线</td><td>市区密集，和都营共用「地铁券」</td></tr>
-        <tr><td>都营</td><td>大江户线、浅草线</td><td>和 Metro 属不同公司，换乘常有优惠</td></tr>
-        <tr><td>私铁</td><td>小田急、京王、东急</td><td>去箱根/镰仓/横滨等近郊会用到</td></tr>
+        <tr><th>公司</th><th>代表</th><th>说明</th></tr>
+        <tr><td>JR</td><td>山手线、新干线</td><td>全国性。山手线是东京绕城环线</td></tr>
+        <tr><td>东京 Metro / 都营</td><td>银座线、大江户线</td><td>东京市区地铁，共用「地铁券」</td></tr>
+        <tr><td>私铁</td><td>小田急、京王、阪急</td><td>近郊与关西城市间常用</td></tr>
+        <tr><td>新干线</td><td>东海道、山阳</td><td>跨城市主力，价格高但快</td></tr>
       </table>
       <div class="note" style="margin-bottom:0">
         <b>关键概念：直通运转</b>
-        有些线路会"跨公司直通"（比如地铁开到私铁线上去）。
-        <b>不用下车换乘</b>，但票价按实际乘坐的全程算——刷卡会自动算好，买票的话要留意。
+        有些线路跨公司直通（地铁开到私铁线上）。<b>不用下车换乘</b>，
+        但票价按全程算——刷卡会自动算好。
       </div>
     </div>
 
     <div class="card">
       <h3 style="margin-top:0">③ 换乘与找路</h3>
-      <p>东京的大站（新宿、东京、涩谷）本身就是迷宫，<b>出站口有几十个</b>。实用做法：</p>
-      <ul style="margin:12px 0 0 20px">
-        <li>用 <b>Google Maps</b> 查路线，它会告诉你"坐几号车、在几号站台、从哪个出口出"</li>
-        <li>看 <b>站内编号</b>：出口都是字母+数字（如 <span class="kbd">A7</span>），跟着指示牌走</li>
-        <li>记住目的地对应的<b>出口编号</b>再出站，能少走十几分钟</li>
-        <li>大站里找"<b>みどりの窓口</b>"（绿色窗口）= 人工服务台，可以问路</li>
+      <ul style="margin-left:20px">
+        <li>用 <b>Google Maps</b> 查路线，它会告诉你"几号站台、哪个出口"</li>
+        <li>看 <b>站内编号</b>：出口是字母+数字（如 <span class="kbd">A7</span>），跟着指示牌走</li>
+        <li>记住目的地的<b>出口编号</b>再出站，能少走十几分钟</li>
+        <li>大站找"<b>みどりの窓口</b>"（绿色窗口）= 人工服务台</li>
       </ul>
     </div>
 
     <div class="note warn">
       <b>⚠️ 走路量：真实数据</b>
-      东京游一天轻松走到 <b>1.5 万–2 万步（约 10–13 公里）</b>，而且大量是站内换乘。
-      这不是夸张——很多人第二天脚就废了。所以：<b>鞋一定要好走</b>，行程别排太满。
+      日本游一天轻松走到 <b>1.5 万–2 万步（约 10–13 公里）</b>，而且大量是站内换乘。
+      很多人第二天脚就废了。<b>鞋一定要好走</b>，行程别排太满。
     </div>
   </section>
 
-  <!-- ============ 钱 ============ -->
+  <!-- ================= 钱 ================= -->
   <section id="money">
     <h2>钱：现金、卡和免税</h2>
     <p class="lead">日本"看起来无现金"，但很多地方只认现金。</p>
@@ -337,23 +436,18 @@
           <tr><td>便利店</td><td>几乎都支持微信/支付宝</td></tr>
           <tr><td>大型百货、药妆店</td><td>信用卡 / 银联 / 支付宝皆可</td></tr>
           <tr><td>连锁餐饮</td><td>刷卡或现金</td></tr>
-          <tr><td>小馆子、老店</td><td><b>只能现金</b>（很多店门口有自助点餐机，收现金）</td></tr>
+          <tr><td>小馆子、老店</td><td><b>只能现金</b>（常见自助点餐机）</td></tr>
           <tr><td>寺庙、神社、御守</td><td><b>只收现金</b></td></tr>
         </table>
       </div>
-
       <div class="card">
         <h3 style="margin-top:0">现金怎么准备</h3>
         <ul style="margin-left:20px">
           <li>国内换好 <b>3–5 万日元</b>（约 ¥1500–2500）打底</li>
-          <li>日本便利店 <b>ATM 可银联取现</b>（7-11 的最稳），手续费几百日元</li>
-          <li>尽量<b>不要用大钞</b>买小东西，小店会不方便</li>
-          <li>零钱会越来越多，带个小零钱包很实用</li>
+          <li>便利店 <b>ATM 可银联取现</b>（7-11 最稳）</li>
+          <li>尽量<b>不要用大钞</b>买小东西</li>
+          <li>带个小零钱包，硬币会很多</li>
         </ul>
-        <div class="note ok" style="margin:14px 0 0">
-          <b>💡 手数料（手续费）</b>
-          取现时 ATM 会显示。7-11 一般 110–220 日元/次，取一次多一点更划算。
-        </div>
       </div>
     </div>
 
@@ -362,37 +456,36 @@
       <table>
         <tr><th>项目</th><th>规则</th></tr>
         <tr><td>起征金额</td><td>同一家店当天<b>满 5000 日元（不含税）</b></td></tr>
-        <tr><td>消耗品</td><td>化妆品、食品、药品等。<b>会被封袋，离境前不要拆</b></td></tr>
-        <tr><td>一般品</td><td>衣服、电器、包等，不封袋，可当场用</td></tr>
-        <tr><td>所需证件</td><td><b>护照原件</b>（必须本人持护照，复印件不行）</td></tr>
+        <tr><td>消耗品</td><td>化妆品、食品、药品。<b>会被封袋，离境前不要拆</b></td></tr>
+        <tr><td>一般品</td><td>衣服、电器、包，不封袋，可当场用</td></tr>
+        <tr><td>所需证件</td><td><b>护照原件</b>（必须本人持照）</td></tr>
         <tr><td>办理地点</td><td>店内免税柜台（不是机场）</td></tr>
       </table>
       <div class="note warn" style="margin-bottom:0">
         <b>⚠️ 两个容易踩的坑</b>
         ① 消耗品和一般品<b>金额不能合并计算</b>（要各自满 5000）。
-        ② 免税商品<b>不能在日本境内消费</b>，尤其是封袋的食品化妆品——拆了可能被要求补税。
+        ② 免税商品<b>不能在日本境内消费</b>，拆封可能被要求补税。
       </div>
     </div>
   </section>
 
-  <!-- ============ 预算 ============ -->
+  <!-- ================= 预算 ================= -->
   <section id="budget">
     <h2>预算估算</h2>
-    <p class="lead">按人数和天数实时算。单位：人民币（汇率默认 1 日元 ≈ 0.048 元，可自行调整）。</p>
+    <p class="lead">按人数和天数实时算。单位人民币（默认 1 日元 ≈ 0.048 元，可调）。</p>
 
     <div class="grid g2">
       <div class="card">
         <h3 style="margin-top:0">人数与天数</h3>
         <div class="calc-row"><label>出行人数</label><input type="number" id="people" value="2" min="1" max="20" inputmode="numeric"></div>
-        <div class="calc-row"><label>停留天数</label><input type="number" id="days" value="5" min="1" max="60" inputmode="numeric"></div>
+        <div class="calc-row"><label>停留天数</label><input type="number" id="days" value="7" min="1" max="60" inputmode="numeric"></div>
         <div class="calc-row"><label>汇率（1 日元 = ? 元）</label><input type="number" id="rate" value="0.048" step="0.001" min="0.01" inputmode="decimal"></div>
       </div>
-
       <div class="card">
         <h3 style="margin-top:0">日均单人开销（日元）</h3>
         <div class="calc-row"><label>住宿 / 晚</label><input type="number" id="hotel" value="9000" step="500" inputmode="numeric"></div>
         <div class="calc-row"><label>餐饮 / 天</label><input type="number" id="food" value="4500" step="500" inputmode="numeric"></div>
-        <div class="calc-row"><label>交通 / 天</label><input type="number" id="trans" value="1200" step="100" inputmode="numeric"></div>
+        <div class="calc-row"><label>交通 / 天</label><input type="number" id="trans" value="2000" step="100" inputmode="numeric"></div>
         <div class="calc-row"><label>门票景点 / 天</label><input type="number" id="ticket" value="1500" step="500" inputmode="numeric"></div>
         <div class="calc-row"><label>购物 / 天</label><input type="number" id="shop" value="4000" step="500" inputmode="numeric"></div>
       </div>
@@ -400,77 +493,70 @@
 
     <div class="card">
       <h3 style="margin-top:0">明细</h3>
-      <table id="bdetail">
-        <tr><th>项目</th><th>单人/天（元）</th><th>合计（元）</th></tr>
-      </table>
+      <table id="bdetail"><tr><th>项目</th><th>单人/天（元）</th><th>合计（元）</th></tr></table>
       <div class="total">
         <div>预计总花费<br><small id="percap">—</small></div>
         <div class="num" id="btotal">—</div>
       </div>
       <div class="note" style="margin-bottom:0">
-        <b>参考量级（单人 5 天）</b>
-        省着花 ≈ 4000–6000 元；正常玩 ≈ 7000–10000 元；加机票（往返 2000–4000 元）另算。
-        购物是最大变量，上面默认值只是日常水平。
+        <b>参考量级（单人 7 天）</b>
+        省着花 ≈ 6000–9000 元；正常玩 ≈ 10000–15000 元。
+        <b>跨城市（东京–京都–大阪）要把新干线算进去</b>，单程约 14000 日元。
       </div>
     </div>
   </section>
 
-  <!-- ============ 行程 ============ -->
+  <!-- ================= 行程 ================= -->
   <section id="plan">
-    <h2>5 天参考行程</h2>
+    <h2>7 天参考行程（东京 + 关西）</h2>
     <p class="lead">按"每天一个片区"排，减少来回坐车。可自由打乱。</p>
 
-    <div class="day">
-      <span class="pt"></span>
-      <div class="when">DAY 1 · 抵达 + 浅草</div>
-      <h4>落地适应，轻装上阵</h4>
-      <p>成田/羽田入境 → 买/加交通卡 → 到酒店放行李 → <b>浅草寺 + 仲见世商店街</b> → 隅田川边散步看晴空塔夜景。</p>
-      <p style="margin-top:8px;color:var(--sub);font-size:13px">第一天别排太满。入境 + 找路 + 换乘很耗神，晚上能走到浅草就够了。</p>
+    <div class="day"><span class="pt"></span>
+      <div class="when">DAY 1–3 · 东京</div>
+      <h4>浅草 → 上野秋叶原 → 涩谷原宿 → 新宿</h4>
+      <p>落地适应 → <b>浅草寺 + 晴空塔</b> → <b>上野公园 + 秋叶原</b> → <b>明治神宫 + 原宿 + 涩谷</b> → <b>新宿都厅展望室</b>（免费）。</p>
+      <p style="margin-top:8px;color:var(--sub);font-size:13px">第一天别排满。入境+找路很耗神，能走到浅草就够了。</p>
     </div>
 
-    <div class="day">
-      <span class="pt"></span>
-      <div class="when">DAY 2 · 上野 + 秋叶原</div>
-      <h4>博物馆、公园、电器城</h4>
-      <p><b>上野公园</b>（博物馆群、动物园、不忍池）→ 阿美横町商店街 → <b>秋叶原</b> 电器/动漫街 → 晚上可去 <b>东京站</b> 看红砖站房。</p>
-      <p style="margin-top:8px;color:var(--sub);font-size:13px">上野和秋叶原只隔一站，串起来很顺。买电器记得比价，免税要带护照。</p>
+    <div class="day"><span class="pt"></span>
+      <div class="when">DAY 4 · 富士山 / 箱根</div>
+      <h4>出城一天</h4>
+      <p>新宿坐巴士或 JR 到 <b>河口湖</b> 看富士山，或去 <b>箱根</b> 泡温泉 + 芦之湖。当天可往返。</p>
+      <p style="margin-top:8px;color:var(--sub);font-size:13px">看富士山很看天气，建议留机动日；能见度差就改去镰仓。</p>
     </div>
 
-    <div class="day">
-      <span class="pt"></span>
-      <div class="when">DAY 3 · 涩谷 + 原宿 + 表参道</div>
-      <h4>潮流区一整天</h4>
-      <p><b>明治神宫</b>（早上人少）→ <b>原宿</b> 竹下通 → <b>表参道</b> 品牌街 → <b>涩谷</b> 十字路口、SHIBUYA SKY 观景台（需预约）。</p>
-      <p style="margin-top:8px;color:var(--sub);font-size:13px">SHIBUYA SKY 建议提前网上订票，日落时段最抢手。这一片走路量很大。</p>
+    <div class="day"><span class="pt"></span>
+      <div class="when">DAY 5 · 东京 → 京都</div>
+      <h4>新干线移动</h4>
+      <p>东京站坐新干线到京都（约 2 小时 15 分）。下午到 <b>伏见稻荷大社</b>（千本鸟居，傍晚人少）。</p>
+      <p style="margin-top:8px;color:var(--sub);font-size:13px">新干线单程约 14000 日元。行李可提前用宅急便寄到下一站酒店。</p>
     </div>
 
-    <div class="day">
-      <span class="pt"></span>
-      <div class="when">DAY 4 · 新宿 + 中野</div>
-      <h4>都厅免费展望 + 老街</h4>
-      <p><b>新宿御苑</b> → <b>东京都厅展望室</b>（免费！）→ 歌舞伎町 → 下午去 <b>中野百老汇</b>（二手动漫周边）或 <b>高円寺</b>（古着）。</p>
-      <p style="margin-top:8px;color:var(--sub);font-size:13px">都厅展望室免费且视野好，性价比极高。新宿站真的很绕，预留找路时间。</p>
+    <div class="day"><span class="pt"></span>
+      <div class="when">DAY 6 · 京都</div>
+      <h4>清水寺 → 祇园 → 金阁寺 → 岚山</h4>
+      <p><b>清水寺</b>（早去）→ <b>二年坂三年坂</b> → <b>祇园花见小路</b> → <b>金阁寺</b> → <b>岚山竹林 + 渡月桥</b>。</p>
+      <p style="margin-top:8px;color:var(--sub);font-size:13px">京都巴士比地铁方便，买一日券。热门寺院早上 8 点前到能躲开人流。</p>
     </div>
 
-    <div class="day">
-      <span class="pt"></span>
-      <div class="when">DAY 5 · 机动 / 近郊</div>
-      <h4>缓冲一天</h4>
-      <p>选一个：<b>镰仓</b>（大佛 + 江之电，约 1 小时）、<b>横滨</b>（港未来、中华街）、或 <b>台场</b>（海滨、高达、购物）。</p>
-      <p style="margin-top:8px;color:var(--sub);font-size:13px">留一天机动很必要——前几天没逛完的、想回购的，都放这天。</p>
+    <div class="day"><span class="pt"></span>
+      <div class="when">DAY 7 · 大阪 / 奈良</div>
+      <h4>收尾</h4>
+      <p>京都 → <b>奈良公园</b> 喂鹿 + 东大寺 → <b>大阪城</b> → <b>道顿堀</b> 吃章鱼烧、串炸 → 关西机场回国。</p>
+      <p style="margin-top:8px;color:var(--sub);font-size:13px">关西机场从难波坐南海电铁约 45 分钟，留足时间。</p>
     </div>
 
     <div class="note ok">
       <b>💡 排行程的原则</b>
-      每天锁定<b>一个片区</b>，别东一个西一个。东京地铁单程动辄 20–30 分钟，
+      每天锁定<b>一个片区</b>，别东一个西一个。日本单程动辄 20–40 分钟，
       来回横跳会白白吃掉两小时。
     </div>
   </section>
 
-  <!-- ============ 日语 ============ -->
+  <!-- ================= 日语 ================= -->
   <section id="jp">
     <h2>应急日语</h2>
-    <p class="lead">不需要会日语，但会这几句体验差别很大。照着念就行，小字是发音。</p>
+    <p class="lead">不需要会日语，但会这几句体验差别很大。小字是发音。</p>
 
     <div class="grid g2">
       <div class="card">
@@ -478,9 +564,8 @@
         <div class="phrase"><div><div class="jp">すみません</div><div class="ro">su-mi-ma-sen</div></div><div class="cn">不好意思 / 打扰一下<br><small>万能句，叫服务员、问路都用</small></div></div>
         <div class="phrase"><div><div class="jp">ありがとうございます</div><div class="ro">a-ri-ga-to-u go-za-i-ma-su</div></div><div class="cn">谢谢</div></div>
         <div class="phrase"><div><div class="jp">お願いします</div><div class="ro">o-ne-gai-shi-ma-su</div></div><div class="cn">拜托了 / 麻烦了</div></div>
-        <div class="phrase"><div><div class="jp">大丈夫です</div><div class="ro">dai-jou-bu de-su</div></div><div class="cn">不用了 / 没关系<br><small>拒绝推销时很好用</small></div></div>
+        <div class="phrase"><div><div class="jp">大丈夫です</div><div class="ro">dai-jou-bu de-su</div></div><div class="cn">不用了 / 没关系<br><small>拒绝推销时好用</small></div></div>
       </div>
-
       <div class="card">
         <h3 style="margin-top:0">实用场景</h3>
         <div class="phrase"><div><div class="jp">いくらですか</div><div class="ro">i-ku-ra de-su-ka</div></div><div class="cn">多少钱？</div></div>
@@ -490,15 +575,14 @@
         <div class="phrase"><div><div class="jp">トイレはどこですか</div><div class="ro">to-i-re wa do-ko de-su-ka</div></div><div class="cn">洗手间在哪？</div></div>
       </div>
     </div>
-
     <div class="note">
       <b>其实用不上也没关系</b>
-      日本服务业对外国游客很习惯。实在沟通不了，<b>掏手机打翻译</b>或<b>比划 + 手势</b>都能解决。
-      真正需要沟通的场合（点餐、买东西）大多有图或自助机。
+      日本服务业对外国游客很习惯。沟通不了就<b>掏手机打翻译</b>或<b>比划手势</b>。
+      真正要沟通的场合（点餐、买东西）大多有图或自助机。
     </div>
   </section>
 
-  <!-- ============ 避坑 ============ -->
+  <!-- ================= 避坑 ================= -->
   <section id="trap">
     <h2>避坑清单</h2>
     <p class="lead">这些都是"没人事先告诉你、到了才知道"的事。</p>
@@ -507,25 +591,24 @@
       <div class="card">
         <h3 style="margin-top:0">🔴 一定会踩的</h3>
         <ul style="margin-left:20px">
-          <li><b>垃圾桶找不到</b>：街上几乎没有。垃圾自己带回酒店，或在便利店丢</li>
-          <li><b>走路走到崩溃</b>：日均 1.5–2 万步是常态。鞋选错，后面几天都废</li>
-          <li><b>大站迷宫</b>：新宿站有 200 多个出口。跟着 Google Maps 的出口编号走</li>
-          <li><b>现金不够</b>：小馆子、老店、神社只收现金。至少备 3 万日元</li>
+          <li><b>垃圾桶找不到</b>：街上几乎没有，垃圾带回酒店</li>
+          <li><b>走路走到崩溃</b>：日均 1.5–2 万步是常态</li>
+          <li><b>大站迷宫</b>：新宿站 200 多个出口，跟出口编号走</li>
+          <li><b>现金不够</b>：小馆子、老店、神社只收现金</li>
           <li><b>店里禁止饮食</b>：边走边吃在很多地方不礼貌</li>
-          <li><b>地铁券不含 JR</b>：买了 24 小时券却发现主要坐山手线</li>
+          <li><b>地铁券不含 JR</b>：买了券却发现主要坐山手线</li>
         </ul>
       </div>
-
       <div class="card">
         <h3 style="margin-top:0">🟡 容易忽略的</h3>
         <ul style="margin-left:20px">
-          <li><b>电车很准时，但末班车早</b>：多数线路 24:00 前后收班</li>
-          <li><b>排队文化</b>：扶手电梯左侧站立（关东），右侧通行</li>
-          <li><b>不给小费</b>：日本没有小费文化，给了反而尴尬</li>
+          <li><b>末班车早</b>：多数线路 24:00 前后收班</li>
+          <li><b>扶手电梯</b>：关东站左侧、关西站右侧，跟人群走就行</li>
+          <li><b>不给小费</b>：给了反而尴尬</li>
           <li><b>垃圾分类</b>：可燃/不可燃/瓶罐要分开</li>
-          <li><b>泡温泉要先洗身</b>：进池前必须冲洗，毛巾别泡进池里</li>
+          <li><b>泡温泉先洗身</b>：毛巾别泡进池里</li>
           <li><b>居酒屋"お通し"</b>：上小菜会自动收费，属正常</li>
-          <li><b>药妆店比价</b>：同一条街价格能差 20%</li>
+          <li><b>药妆店比价</b>：同一条街能差 20%</li>
         </ul>
       </div>
     </div>
@@ -533,12 +616,12 @@
     <div class="note warn">
       <b>⚠️ 关于拍照</b>
       很多店铺、神社、展馆<b>禁止拍照</b>（有明确标识）。
-      拍路人、特别是拍小孩，要格外注意——日本对肖像权比较敏感。
+      拍路人、特别是拍小孩要格外注意——日本对肖像权比较敏感。
       不确定就先问 <span class="kbd">写真を撮ってもいいですか</span>。
     </div>
   </section>
 
-  <!-- ============ 行前清单 ============ -->
+  <!-- ================= 清单 ================= -->
   <section id="check">
     <h2>出发前最终核对</h2>
     <p class="lead">出发前一晚照着过一遍。</p>
@@ -555,7 +638,6 @@
           <li><span class="box"></span><span class="txt">保险单（如有）</span></li>
         </ul>
       </div>
-
       <div class="card">
         <h3 style="margin-top:0">电子与随身</h3>
         <ul class="check" data-key="final2">
@@ -576,18 +658,17 @@
 <button id="top" aria-label="回到顶部">↑</button>
 
 <footer>
-  东京实用攻略 · 本地静态页面，双击即可打开，无需联网<br>
-  <span style="opacity:.7">数据为经验参考值，出行前请以官方信息为准 · 打勾状态保存在本机浏览器里</span>
+  日本旅游攻略 · 单文件网页 · 地图为真实街道瓦片（需联网）<br>
+  <span style="opacity:.7">景点坐标与照片来自维基百科 / 维基共享资源（开放版权） · 页头图为忠灵塔与富士山 · 打勾状态保存在本机浏览器</span>
 </footer>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function(){
-  /* ---------- 导航 ---------- */
-  const tabs = [
-    ['prep','出发前'], ['traffic','交通'], ['money','钱与免税'],
-    ['budget','预算'], ['plan','行程'], ['jp','日语'], ['trap','避坑'], ['check','核对清单']
-  ];
-  const nav = document.getElementById('nav');
+  /* ================= 导航 ================= */
+  const tabs=[['map','地图'],['prep','出发前'],['traffic','交通'],['money','钱与免税'],
+              ['budget','预算'],['plan','行程'],['jp','日语'],['trap','避坑'],['check','核对清单']];
+  const nav=document.getElementById('nav');
   tabs.forEach(([id,label],i)=>{
     const b=document.createElement('button');
     b.textContent=label; b.dataset.target=id;
@@ -595,68 +676,243 @@
     b.onclick=()=>{
       document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
       document.querySelectorAll('main section').forEach(x=>x.classList.remove('on'));
-      b.classList.add('on');
-      document.getElementById(id).classList.add('on');
-      // 移动端把选中的标签滚进视野
-      if(b.scrollIntoView){ try{ b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'}); }catch(e){} }
+      b.classList.add('on'); document.getElementById(id).classList.add('on');
+      try{ b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'}); }catch(e){}
       window.scrollTo({top:0,behavior:'smooth'});
+      if(id==='map' && map) setTimeout(()=>map.invalidateSize(),80);
     };
     nav.appendChild(b);
   });
 
-  /* ---------- 打勾清单（localStorage 持久化） ---------- */
+  /* ================= 地图（Leaflet + 真实瓦片） ================= */
+  const SPOTS = [{n:'札幌雪祭',r:'北海道',lat:43.06,lon:141.35,d:'2 月上旬的大通公园雪雕，日本冬季招牌',img:'images/sapporo-snow-festival.jpg'},{n:'函馆山夜景',r:'北海道',lat:40.83,lon:140.71,d:'世界三大夜景之一，缆车上山看函馆湾',img:'images/hakodate-night-view.jpg'},{n:'小樽运河',r:'北海道',lat:43.19,lon:141,d:'运河仓库群，冬天有雪灯路',img:'images/otaru-canal.jpg'},{n:'富良野花田',r:'北海道',lat:43.34,lon:142.38,d:'7 月薰衣草，紫色花海最盛',img:'images/furano-lavender.jpg'},{n:'奥入濑溪流',r:'东北',lat:40.5,lon:140.98,d:'青森，苔藓与流水的徒步路线',img:'images/oirase-stream.jpg'},{n:'藏王树冰',r:'东北',lat:38.16,lon:140.42,d:'山形，1–2 月雪怪奇观',img:'images/zao-snow-monsters.jpg'},{n:'银山温泉',r:'东北',lat:38.56,lon:140.42,d:'大正浪漫街景，冬天像电影场景',img:'images/ginzan-onsen.jpg'},{n:'浅草寺',r:'东京',lat:35.7148,lon:139.7967,d:'东京最古老寺庙，雷门大灯笼',img:'images/sensoji.jpg'},{n:'东京晴空塔',r:'东京',lat:35.7101,lon:139.8107,d:'634m，350/450m 双层展望',img:'images/tokyo-skytree.jpg'},{n:'明治神宫',r:'东京',lat:35.6764,lon:139.6995,d:'原宿旁的森林，早上人少',img:'images/meiji-shrine.jpg'},{n:'涩谷十字路口',r:'东京',lat:35.6595,lon:139.7006,d:'世界最忙路口 + SHIBUYA SKY',img:'images/shibuya-crossing.jpg'},{n:'东京都厅展望室',r:'东京',lat:35.6896,lon:139.6917,d:'新宿，免费展望台，性价比极高',img:'images/tokyo-tocho.jpg'},{n:'丰洲市场',r:'东京',lat:35.6455,lon:139.7858,d:'替代筑地，早上看金枪鱼拍卖',img:'images/toyosu-market.jpg'},{n:'台场',r:'东京',lat:35.63,lon:139.7756,d:'海滨、独角兽高达、购物',img:'images/odaiba.jpg'},{n:'上野公园',r:'东京',lat:35.7141,lon:139.7714,d:'博物馆群、动物园、樱花名所',img:'images/ueno-park.jpg'},{n:'富士山',r:'中部',lat:35.3606,lon:138.7274,d:'河口湖/忍野八海是最佳观景位',img:'images/mount-fuji.jpg'},{n:'白川乡合掌村',r:'中部',lat:36.2578,lon:136.9064,d:'世界遗产，冬季点灯需抽签',img:'images/shirakawa-go.jpg'},{n:'金泽兼六园',r:'中部',lat:36.5622,lon:136.6626,d:'日本三大名园，兼六园+东茶屋街',img:'images/kenrokuen.jpg'},{n:'立山黑部雪墙',r:'中部',lat:36.57,lon:137.6,d:'4–6 月，15m 高雪之大谷',img:'images/tateyama-kurobe.jpg'},{n:'高山古街',r:'中部',lat:36.1407,lon:137.2531,d:'飞驒小京都，早市与清酒',img:'images/takayama.jpg'},{n:'轻井泽',r:'中部',lat:36.3486,lon:138.5967,d:'高原避暑、教堂与奥特莱斯',img:'images/karuizawa.jpg'},{n:'清水寺',r:'京都',lat:34.9949,lon:135.785,d:'舞台悬空，红叶季人山人海',img:'images/kiyomizu-dera.jpg'},{n:'伏见稻荷大社',r:'京都',lat:34.9671,lon:135.7727,d:'千本鸟居，早去免排队',img:'images/fushimi-inari.jpg'},{n:'金阁寺',r:'京都',lat:35.0394,lon:135.7292,d:'金箔舍利殿，雪后最美',img:'images/kinkakuji.jpg'},{n:'岚山竹林',r:'京都',lat:35.017,lon:135.6717,d:'竹林小径 + 渡月桥 + 小火车',img:'images/arashiyama-bamboo.jpg'},{n:'祇园',r:'京都',lat:35.0037,lon:135.7788,d:'花见小路，傍晚可能遇到艺妓',img:'images/gion.jpg'},{n:'大阪城',r:'大阪',lat:34.6873,lon:135.5259,d:'天守阁 + 西之丸庭园赏樱',img:'images/osaka-castle.jpg'},{n:'道顿堀',r:'大阪',lat:34.6687,lon:135.5012,d:'格力高招牌，章鱼烧与串炸',img:'images/dotonbori.jpg'},{n:'环球影城',r:'大阪',lat:34.6654,lon:135.4323,d:'USJ，任天堂世界需整理券',img:'images/usj.jpg'},{n:'奈良公园',r:'奈良',lat:34.6851,lon:135.8432,d:'喂鹿 + 东大寺大佛',img:'images/nara-park.jpg'},{n:'严岛神社',r:'广岛',lat:34.2959,lon:132.3199,d:'海上大鸟居，涨潮时浮在水上',img:'images/itsukushima.jpg'},{n:'原爆圆顶馆',r:'广岛',lat:34.3955,lon:132.4536,d:'世界遗产，平和纪念公园',img:'images/atomic-bomb-dome.jpg'},{n:'仓敷美观地区',r:'冈山',lat:34.5953,lon:133.7714,d:'白墙柳树运河，小京都风情',img:'images/kurashiki.jpg'},{n:'道后温泉',r:'爱媛',lat:33.852,lon:132.7712,d:'日本最古老温泉之一，夏目漱石常来',img:'images/dogo-onsen.jpg'},{n:'太宰府天满宫',r:'福冈',lat:33.5215,lon:130.535,d:'学问之神，梅枝饼必吃',img:'images/dazaifu.jpg'},{n:'由布院',r:'大分',lat:33.2658,lon:131.3556,d:'温泉小镇，汤之坪街道',img:'images/yufuin.jpg'},{n:'别府地狱温泉',r:'大分',lat:33.3167,lon:131.4783,d:'八大地狱，海地狱最出名',img:'images/beppu-jigoku.jpg'},{n:'熊本城',r:'熊本',lat:32.8061,lon:130.7058,d:'重建后的黑色天守',img:'images/kumamoto-castle.jpg'},{n:'樱岛',r:'鹿儿岛',lat:31.5931,lon:130.6586,d:'活火山，渡轮 15 分钟到',img:'images/sakurajima.jpg'},{n:'首里城',r:'冲绳',lat:26.217,lon:127.7192,d:'琉球王国宫殿，部分重建中',img:'images/shuri-castle.jpg'},{n:'美丽海水族馆',r:'冲绳',lat:26.6944,lon:127.7,d:'黑潮之海大水槽，鲸鲨',img:'images/churaumi.jpg'}];
+
+  const LAYERS = {
+    street:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+            opt:{maxZoom:19,attribution:'&copy; Esri'}},
+    sat:   {url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            opt:{maxZoom:19,attribution:'&copy; Esri, Maxar'}},
+  };
+
+  let map=null, tileLayer=null, curLayer='street';
+  const markers=[];          // 每个景点一个标记
+
+  const pinIcon=(sel)=>L.divIcon({
+    className:'', iconSize:[17,17], iconAnchor:[8.5,17], popupAnchor:[0,-16],
+    html:'<div class="pin s'+(sel?' sel':'')+'"></div>'
+  });
+
+  function initMap(){
+    if(map || typeof L==='undefined') return;
+    map=L.map('leafletMap',{scrollWheelZoom:true,zoomControl:true}).setView([37.6,137.5],5);
+    setLayer('street');
+
+    SPOTS.forEach(s=>{
+      const m=L.marker([s.lat,s.lon],{icon:pinIcon(false),riseOnHover:true,title:s.n});
+      let html='';
+      if(s.img){
+        html+='<div class="pw"><img src="'+s.img+'" alt="'+s.n+'" loading="lazy"'+
+              ' onerror="this.parentNode.style.display=\'none\'"></div>';
+      }
+      html+='<span class="rg">'+s.r+'</span><b>'+s.n+'</b>'+
+            '<span class="ds2">'+s.d+'</span>'+
+            '<a class="pact" target="_blank" rel="noopener" href="'+
+            'https://zh.wikipedia.org/wiki/'+encodeURIComponent(s.n)+'">查看维基百科 →</a>';
+      m.bindPopup(html, {maxWidth:262,minWidth:236,autoPan:true,autoPanPadding:[24,24],closeButton:true});
+      m.on('click',()=>highlight(s));
+      m.addTo(map);
+      markers.push({spot:s,marker:m});
+    });
+  }
+
+  function setLayer(key){
+    if(!map) return;
+    curLayer=key;
+    if(tileLayer) map.removeLayer(tileLayer);
+    const c=LAYERS[key];
+    tileLayer=L.tileLayer(c.url,Object.assign({attribution:c.attribution},c.opt)).addTo(map);
+    document.querySelectorAll('#layers button').forEach(b=>b.classList.toggle('on',b.dataset.l===key));
+  }
+
+  function highlight(s){
+    markers.forEach(x=>x.marker.setIcon(pinIcon(x.spot===s)));
+    document.querySelectorAll('.item').forEach(n=>n.classList.toggle('sel',!!s&&n.dataset.n===s.n));
+  }
+
+  function goTo(s, zoom){
+    if(!map) return;
+    map.setView([s.lat,s.lon], zoom||13, {animate:true});
+    highlight(s);
+    const rec=markers.find(x=>x.spot===s);
+    if(rec) setTimeout(()=>rec.marker.openPopup(), 320);
+  }
+
+  /* ---------- 地区筛选 ---------- */
+  const regions=[...new Set(SPOTS.map(s=>s.r))];
+  const chips=document.getElementById('chips');
+  const chipAll=document.createElement('button');
+  chipAll.className='chip on'; chipAll.textContent='全部';
+  chipAll.onclick=()=>setRegion('全部'); chips.appendChild(chipAll);
+  regions.forEach(r=>{
+    const c=document.createElement('button');
+    c.className='chip'; c.textContent=r;
+    c.onclick=()=>setRegion(r); chips.appendChild(c);
+  });
+  const hint=document.createElement('span');
+  hint.className='map-hint'; hint.textContent='滚轮缩放 · 拖动平移 · 可放大到街道';
+  chips.appendChild(hint);
+
+  function setRegion(r){
+    chips.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.textContent===r));
+    if(!map) return;
+    const show=markers.filter(x=>r==='全部'||x.spot.r===r);
+    markers.forEach(x=>{
+      if(r==='全部'||x.spot.r===r){ if(!map.hasLayer(x.marker)) x.marker.addTo(map); }
+      else { map.removeLayer(x.marker); }
+    });
+    if(r!=='全部'&&show.length){
+      map.fitBounds(L.latLngBounds(show.map(x=>[x.spot.lat,x.spot.lon])),{padding:[70,70],maxZoom:12});
+    }else if(r==='全部'){
+      map.setView([37.6,137.5],5);
+    }
+  }
+
+  /* ---------- 按地区列表 ---------- */
+  const listEl=document.getElementById('list');
+  regions.forEach(r=>{
+    const g=document.createElement('div'); g.className='rg-group';
+    const h=document.createElement('h4'); h.textContent=r; g.appendChild(h);
+    const wrap=document.createElement('div'); wrap.className='items';
+    SPOTS.filter(s=>s.r===r).forEach(s=>{
+      const it=document.createElement('div');
+      it.className='item'; it.textContent=s.n; it.dataset.n=s.n;
+      it.onclick=()=>{ setRegion('全部'); goTo(s,13); };
+      wrap.appendChild(it);
+    });
+    g.appendChild(wrap); listEl.appendChild(g);
+  });
+
+  /* ---------- 搜索 ---------- */
+  const q=document.getElementById('q');
+  const resBox=document.getElementById('results');
+  const qClear=document.getElementById('qclear');
+  let resList=[], resIdx=-1;
+
+  const norm=t=>String(t||'').toLowerCase().replace(/\s+/g,'');
+  function search(term){
+    const t=norm(term);
+    if(!t) return [];
+    // 名称优先，其次地区、描述
+    const a=[],b=[],c=[];
+    SPOTS.forEach(s=>{
+      if(norm(s.n).indexOf(t)>=0) a.push(s);
+      else if(norm(s.r).indexOf(t)>=0) b.push(s);
+      else if(norm(s.d).indexOf(t)>=0) c.push(s);
+    });
+    return a.concat(b,c).slice(0,12);
+  }
+
+  function renderRes(list, term){
+    resList=list; resIdx=-1;
+    if(!term){ resBox.classList.remove('on'); resBox.innerHTML=''; return; }
+    if(!list.length){
+      resBox.innerHTML='<div class="res-empty">没有找到「'+term+'」<br>试试：富士山 / 京都 / 冲绳</div>';
+      resBox.classList.add('on'); return;
+    }
+    resBox.innerHTML=list.map((s,k)=>
+      '<div class="res" data-k="'+k+'"><div><span class="nm">'+s.n+
+      '</span><span class="ds">'+s.d+'</span></div><span class="rg2">'+s.r+'</span></div>').join('');
+    [...resBox.querySelectorAll('.res')].forEach(el=>{
+      el.onclick=()=>pick(parseInt(el.dataset.k,10));
+      el.onmouseenter=()=>{ resIdx=parseInt(el.dataset.k,10); paintAct(); };
+    });
+    resBox.classList.add('on');
+  }
+  function paintAct(){
+    resBox.querySelectorAll('.res').forEach((el,k)=>el.classList.toggle('act',k===resIdx));
+  }
+  function pick(k){
+    const s=resList[k]; if(!s) return;
+    resBox.classList.remove('on');
+    q.value=s.n; qClear.classList.add('on');
+    setRegion('全部');
+    goTo(s,13);
+  }
+
+  q.addEventListener('input',()=>{
+    const v=q.value.trim();
+    qClear.classList.toggle('on',!!v);
+    renderRes(search(v), v);
+  });
+  q.addEventListener('keydown',e=>{
+    if(!resBox.classList.contains('on')) return;
+    if(e.key==='ArrowDown'){ e.preventDefault(); resIdx=Math.min(resIdx+1,resList.length-1); paintAct(); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); resIdx=Math.max(resIdx-1,0); paintAct(); }
+    else if(e.key==='Enter'){ e.preventDefault(); pick(resIdx<0?0:resIdx); }
+    else if(e.key==='Escape'){ resBox.classList.remove('on'); }
+  });
+  qClear.onclick=()=>{ q.value=''; qClear.classList.remove('on'); resBox.classList.remove('on'); highlight(null); q.focus(); };
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('.search-wrap')) resBox.classList.remove('on');
+  });
+  q.addEventListener('focus',()=>{ if(q.value.trim()) renderRes(search(q.value.trim()), q.value.trim()); });
+
+  /* ---------- 图层切换 ---------- */
+  document.querySelectorAll('#layers button').forEach(b=>{
+    b.onclick=()=>setLayer(b.dataset.l);
+  });
+
+  /* ---------- 等 Leaflet 就绪 ---------- */
+  (function waitL(n){
+    if(typeof L!=='undefined'){ initMap(); return; }
+    if(n>60){
+      document.getElementById('leafletMap').innerHTML=
+        '<div style="display:flex;height:100%;align-items:center;justify-content:center;'+
+        'color:#6b7280;font-size:14px;text-align:center;padding:24px;line-height:2">'+
+        '⚠️ 地图底图加载失败（需要联网）<br>请检查网络，或使用下方的「按地区浏览」列表</div>';
+      return;
+    }
+    setTimeout(()=>waitL(n+1),100);
+  })(0);
+
+  /* ================= 打勾清单 ================= */
   document.querySelectorAll('.check').forEach(list=>{
-    const key = 'jpguide:' + (list.dataset.key || 'default');
-    let saved = {};
-    try{ saved = JSON.parse(localStorage.getItem(key) || '{}'); }catch(e){}
+    const key='jpguide:'+(list.dataset.key||'default');
+    let saved={}; try{ saved=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
     [...list.children].forEach((li,i)=>{
       if(saved[i]) li.classList.add('done');
-      li.onclick=()=>{
-        li.classList.toggle('done');
-        saved[i]=li.classList.contains('done');
-        try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
-      };
+      li.onclick=()=>{ li.classList.toggle('done'); saved[i]=li.classList.contains('done');
+        try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){} };
     });
   });
 
-  /* ---------- 预算计算 ---------- */
+  /* ================= 预算 ================= */
   const ids=['people','days','rate','hotel','food','trans','ticket','shop'];
   const el={}; ids.forEach(i=>el[i]=document.getElementById(i));
   const detail=document.getElementById('bdetail');
   const rows=[['住宿','hotel'],['餐饮','food'],['交通','trans'],['门票景点','ticket'],['购物','shop']];
-
   function calc(){
     const people=Math.max(1,+el.people.value||1);
-    const days  =Math.max(1,+el.days.value||1);
-    const rate  =+el.rate.value||0.048;
-
+    const days=Math.max(1,+el.days.value||1);
+    const rate=+el.rate.value||0.048;
     [...detail.querySelectorAll('tr.bodyrow')].forEach(r=>r.remove());
-    let perPersonDayAll=0;
-
+    let per=0;
     rows.forEach(([label,key])=>{
-      const yen=+el[key].value||0;
-      const cny=yen*rate;
-      const total=cny*days*people;
-      perPersonDayAll+=cny;
-      const tr=document.createElement('tr');
-      tr.className='bodyrow';
-      tr.innerHTML='<td>'+label+'</td><td>¥'+cny.toFixed(0)+'</td><td>¥'+total.toFixed(0)+'</td>';
+      const cny=(+el[key].value||0)*rate;
+      per+=cny;
+      const tr=document.createElement('tr'); tr.className='bodyrow';
+      tr.innerHTML='<td>'+label+'</td><td>¥'+cny.toFixed(0)+'</td><td>¥'+(cny*days*people).toFixed(0)+'</td>';
       detail.appendChild(tr);
     });
-
-    const grand = perPersonDayAll*days*people;
-    document.getElementById('btotal').textContent='¥'+grand.toFixed(0);
-    document.getElementById('percap').textContent=
-      '单人 ¥'+(perPersonDayAll*days).toFixed(0)+' · '+people+' 人 × '+days+' 天';
+    document.getElementById('btotal').textContent='¥'+(per*days*people).toFixed(0);
+    document.getElementById('percap').textContent='单人 ¥'+(per*days).toFixed(0)+' · '+people+' 人 × '+days+' 天';
   }
-  ids.forEach(i=>{ el[i].addEventListener('input',calc); });
+  ids.forEach(i=>el[i].addEventListener('input',calc));
   calc();
 
-  /* ---------- 回到顶部 ---------- */
+  /* ================= 回到顶部 ================= */
   const topBtn=document.getElementById('top');
-  window.addEventListener('scroll',()=>{
-    topBtn.classList.toggle('show', window.scrollY>420);
-  },{passive:true});
+  window.addEventListener('scroll',()=>topBtn.classList.toggle('show',window.scrollY>420),{passive:true});
   topBtn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 })();
 </script>
