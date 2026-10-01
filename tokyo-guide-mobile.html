@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1b2a41">
+<meta name="format-detection" content="telephone=no">
+<title>东京旅行攻略 · 实用向</title>
+<style>
+  :root{
+    --bg:#f7f5f2; --card:#ffffff; --ink:#1f2430; --sub:#6b7280;
+    --line:#e6e2dc; --accent:#c9455c; --accent2:#2f6f8f;
+    --ok:#2e9e6b; --warn:#d98324; --shadow:0 2px 10px rgba(31,36,48,.07);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC","Hiragino Sans GB",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.75; font-size:15px;
+    overflow-x:hidden;
+  }
+  a{color:var(--accent2);text-decoration:none}
+  img,table{max-width:100%}
+
+  /* ---------- 头部 ---------- */
+  header{
+    background:linear-gradient(135deg,#1b2a41 0%,#2d4a63 55%,#c9455c 100%);
+    color:#fff; padding:44px 20px 34px; position:relative; overflow:hidden;
+  }
+  header::after{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(circle at 82% 18%, rgba(255,255,255,.18), transparent 42%);
+    pointer-events:none;
+  }
+  header .wrap{max-width:1040px;margin:0 auto;position:relative;z-index:1}
+  header .flag{display:inline-flex;align-items:center;gap:10px;
+    font-size:12px;letter-spacing:.14em;opacity:.9;margin-bottom:14px}
+  header .flag .dot{width:20px;height:20px;border-radius:50%;
+    background:radial-gradient(circle,#e03a4e 0 42%,#fff 42% 100%);box-shadow:0 0 0 1px rgba(255,255,255,.4)}
+  header h1{font-size:26px;line-height:1.3;font-weight:700;letter-spacing:-.01em}
+  header p{margin-top:10px;font-size:14px;opacity:.92}
+  header .meta{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+  header .meta span{font-size:12px;padding:5px 11px;border-radius:999px;
+    background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);
+    -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+
+  /* ---------- 导航（移动端横向滑动） ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;background:rgba(247,245,242,.94);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{
+    max-width:1040px;margin:0 auto;padding:0 12px;display:flex;gap:2px;
+    overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+  }
+  nav .wrap::-webkit-scrollbar{display:none}
+  nav button{
+    background:none;border:none;cursor:pointer;font:inherit;font-size:14px;
+    padding:14px 13px;color:var(--sub);border-bottom:2.5px solid transparent;
+    white-space:nowrap;flex:0 0 auto;scroll-snap-align:start;
+    transition:color .15s,border-color .15s;
+  }
+  nav button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+
+  /* ---------- 内容 ---------- */
+  main{max-width:1040px;margin:0 auto;padding:22px 16px 70px}
+  section{display:none;animation:fade .26s ease}
+  section.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  h2{font-size:21px;margin-bottom:6px;letter-spacing:-.01em;line-height:1.35}
+  h2 + .lead{color:var(--sub);font-size:13.5px;margin-bottom:22px}
+  h3{font-size:16px;margin:26px 0 10px;display:flex;align-items:center;gap:8px;line-height:1.4}
+  h3::before{content:"";width:4px;height:15px;border-radius:2px;background:var(--accent);flex:0 0 auto}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:17px 17px;box-shadow:var(--shadow);margin-bottom:14px;
+  }
+  .grid{display:grid;gap:14px}
+  ul{margin-left:19px}
+  li{margin-bottom:2px}
+
+  /* ---------- 清单（移动端大点击区） ---------- */
+  .check{list-style:none;margin-left:0}
+  .check li{
+    display:flex;gap:11px;align-items:flex-start;padding:11px 4px;
+    border-bottom:1px dashed var(--line);cursor:pointer;border-radius:8px;
+    transition:background .15s;
+  }
+  .check li:active{background:#f4f1ec}
+  .check li:last-child{border-bottom:none}
+  .check .box{
+    flex:0 0 21px;width:21px;height:21px;margin-top:2px;border-radius:6px;
+    border:1.8px solid #c9c4bc;display:flex;align-items:center;justify-content:center;
+    transition:background .15s,border-color .15s;
+  }
+  .check li.done .box{background:var(--ok);border-color:var(--ok)}
+  .check li.done .box::after{content:"";width:5px;height:10px;border:solid #fff;
+    border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-2px)}
+  .check li.done .txt{color:#9aa1ab;text-decoration:line-through}
+  .check .txt small{display:block;color:var(--sub);font-size:12.5px;
+    text-decoration:none;margin-top:2px;line-height:1.6}
+
+  /* ---------- 表格：移动端转卡片 ---------- */
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+  th,td{text-align:left;padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;color:var(--sub);font-weight:600;letter-spacing:.02em;background:#fbfaf8}
+  tr:last-child td{border-bottom:none}
+  td:first-child{font-weight:600}
+
+  /* ---------- 标签 ---------- */
+  .tag{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:999px;margin-right:6px;
+    background:#eef3f6;color:var(--accent2);border:1px solid #dbe6ec}
+
+  /* ---------- 提示框 ---------- */
+  .note{border-left:3px solid var(--accent);background:#fdf5f7;
+    padding:13px 15px;border-radius:0 10px 10px 0;margin:14px 0;font-size:13.5px;line-height:1.75}
+  .note.warn{border-color:var(--warn);background:#fdf8f1}
+  .note.ok{border-color:var(--ok);background:#f2faf6}
+  .note b{display:block;margin-bottom:4px}
+
+  /* ---------- 预算计算器 ---------- */
+  .calc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:11px 0;border-bottom:1px dashed var(--line)}
+  .calc-row:last-of-type{border-bottom:none}
+  .calc-row label{flex:1;font-size:14px;line-height:1.5}
+  .calc-row input[type=number]{
+    width:104px;padding:10px 11px;border:1px solid var(--line);border-radius:9px;
+    font:inherit;font-size:16px;text-align:right;background:#fbfaf8;
+    -webkit-appearance:none;appearance:none;
+  }
+  .calc-row input[type=number]:focus{outline:2px solid #cfe0ea;border-color:var(--accent2)}
+  .total{
+    margin-top:14px;padding:15px 17px;border-radius:12px;
+    background:linear-gradient(135deg,#1b2a41,#2d4a63);color:#fff;
+    display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;
+  }
+  .total .num{font-size:25px;font-weight:700;letter-spacing:-.02em}
+  .total small{opacity:.8;font-size:12px}
+
+  /* ---------- 日语卡 ---------- */
+  .phrase{display:flex;justify-content:space-between;gap:12px;
+    padding:12px 0;border-bottom:1px dashed var(--line);align-items:baseline}
+  .phrase:last-child{border-bottom:none}
+  .phrase .jp{font-size:16.5px;font-weight:600;letter-spacing:.01em}
+  .phrase .ro{font-size:12px;color:var(--sub);font-style:italic}
+  .phrase .cn{font-size:13px;color:var(--sub);text-align:right;flex-shrink:0;max-width:46%}
+
+  /* ---------- 时间轴 ---------- */
+  .day{position:relative;padding-left:26px;margin-bottom:20px}
+  .day::before{content:"";position:absolute;left:6px;top:8px;bottom:-12px;width:2px;background:var(--line)}
+  .day:last-child::before{display:none}
+  .day .pt{position:absolute;left:0;top:5px;width:14px;height:14px;border-radius:50%;
+    background:#fff;border:3px solid var(--accent)}
+  .day h4{font-size:15.5px;margin-bottom:3px;line-height:1.45}
+  .day .when{font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.02em}
+
+  footer{border-top:1px solid var(--line);padding:22px 20px 30px;text-align:center;
+    color:var(--sub);font-size:12px;line-height:1.8}
+  .kbd{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;background:#f0eee9;
+    padding:1px 6px;border-radius:5px;border:1px solid var(--line);white-space:nowrap}
+
+  /* ---------- 回到顶部 ---------- */
+  #top{
+    position:fixed;right:16px;bottom:20px;z-index:60;
+    width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(255,255,255,.92);color:var(--ink);font-size:18px;
+    box-shadow:0 4px 14px rgba(31,36,48,.16);cursor:pointer;
+    display:none;align-items:center;justify-content:center;
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  }
+  #top.show{display:flex}
+
+  /* ================= 平板及以上 ================= */
+  @media(min-width:700px){
+    body{font-size:15px}
+    header{padding:52px 24px 40px}
+    header h1{font-size:34px}
+    header p{font-size:15px;max-width:640px}
+    header .flag{font-size:13px}
+    header .meta span{font-size:12.5px;padding:5px 12px}
+    nav .wrap{padding:0 24px;gap:4px}
+    nav button{font-size:14.5px;padding:15px 16px}
+    main{padding:34px 24px 90px}
+    h2{font-size:23px}
+    h2 + .lead{font-size:14px;margin-bottom:26px}
+    h3{font-size:16.5px;margin:30px 0 12px}
+    .card{padding:20px 22px;margin-bottom:16px}
+    .grid{gap:16px}
+    .g2{grid-template-columns:1fr 1fr}
+    .g3{grid-template-columns:repeat(3,1fr)}
+    .note{padding:14px 18px;font-size:14px}
+    .phrase .jp{font-size:16px}
+    .day{padding-left:30px}
+    .day::before{left:8px}
+    .day .pt{left:2px}
+    .calc-row input[type=number]{width:92px;font-size:14px;padding:7px 10px}
+  }
+
+  /* ================= 小屏专项修正 ================= */
+  @media(max-width:400px){
+    header h1{font-size:23px}
+    main{padding:18px 13px 70px}
+    .card{padding:15px 14px}
+    .calc-row{flex-wrap:wrap;gap:8px}
+    .calc-row input[type=number]{width:100%;text-align:left}
+    .total .num{font-size:22px}
+    .phrase{flex-direction:column;gap:3px;align-items:flex-start}
+    .phrase .cn{text-align:left;max-width:100%}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="flag"><span class="dot"></span>JAPAN · TOKYO</div>
+    <h1>东京实用攻略<br>给第一次去、又不想踩坑的人</h1>
+    <p>不堆景点清单。这里写的是「到了才发现」的那些事：支付怎么搞、地铁怎么坐不迷路、哪里必须带现金、一天到底能走多少路。</p>
+    <div class="meta">
+      <span>💴 现金仍必要</span>
+      <span>🚇 交通卡是刚需</span>
+      <span>🚶 日均 1.5–2 万步</span>
+      <span>🛍️ 免税满 5000 日元</span>
+    </div>
+  </div>
+</header>
+
+<nav><div class="wrap" id="nav"></div></nav>
+
+<main>
+
+  <!-- ============ 出发前 ============ -->
+  <section id="prep" class="on">
+    <h2>出发前要办的</h2>
+    <p class="lead">按顺序做，最省事。点一下打勾，会自动记住。</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3 style="margin-top:0">必备清单</h3>
+        <ul class="check" data-key="prep1">
+          <li><span class="box"></span><span class="txt">护照有效期 ≥ 6 个月<small>免签政策下入境一般无需签证，但护照要够期</small></span></li>
+          <li><span class="box"></span><span class="txt">订好往返机票 + 住宿确认单<small>入境时可能被问，截图存手机</small></span></li>
+          <li><span class="box"></span><span class="txt">买 eSIM 或租随身 WiFi<small>eSIM 便宜省事；多人同行 WiFi 更划算</small></span></li>
+          <li><span class="box"></span><span class="txt">带一张能刷的信用卡<small>Visa/Mastercard 最通用，银联部分能用</small></span></li>
+          <li><span class="box"></span><span class="txt">换 3–5 万日元现金<small>很多老店、小馆子、寺庙只收现金</small></span></li>
+          <li><span class="box"></span><span class="txt">下载「Suica」到 Apple 钱包<small>iPhone 可直接加，安卓视机型</small></span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">这些别带 / 别忘</h3>
+        <ul class="check" data-key="prep2">
+          <li><span class="box"></span><span class="txt">转换插头<small>日本是 A 型两脚扁插，100V。国内两脚扁插可直接用</small></span></li>
+          <li><span class="box"></span><span class="txt">充电宝（随身，不能托运）<small>容量 ≤ 100Wh 可带上飞机</small></span></li>
+          <li><span class="box"></span><span class="txt">舒适的鞋<small>这条最重要，见「交通」里的走路量</small></span></li>
+          <li><span class="box"></span><span class="txt">小垃圾袋<small>街上几乎找不到垃圾桶，垃圾自己带走</small></span></li>
+          <li><span class="box"></span><span class="txt">常用药<small>感冒药、肠胃药，日本买药要沟通，不方便</small></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note warn">
+      <b>⚠️ 关于"地铁 24 小时券"</b>
+      Tokyo Subway Ticket（24/48/72 小时）只覆盖 <b>东京 Metro + 都营地下铁</b>，
+      <b>不含 JR</b>。而山手线（JR）是绕城最常用的线路。所以买之前先想清楚行程要不要坐 JR——
+      很多人买了券却发现主要靠 JR 移动，反而不划算。
+    </div>
+  </section>
+
+  <!-- ============ 交通 ============ -->
+  <section id="traffic">
+    <h2>交通：搞懂这三件事就够了</h2>
+    <p class="lead">东京地铁不难，难的是"不同公司、不同闸机、不同票价体系"。</p>
+
+    <div class="card">
+      <h3 style="margin-top:0">① 交通卡（Suica / PASMO）</h3>
+      <p>这是最重要的东西。<b>刷卡进站、刷卡出站、自动扣费</b>，还能在便利店买东西。</p>
+      <ul style="margin:12px 0 0 20px">
+        <li><b>iPhone 用户</b>：直接在「钱包」App 里加 Suica，用 Apple Pay 充值，最优解</li>
+        <li><b>安卓用户</b>：视机型支持情况，多数需到车站买实体卡（约 500 日元押金）</li>
+        <li>实体卡余额不足时，站内有「精算机」（补票机）可现场充值</li>
+      </ul>
+      <div class="note ok" style="margin-bottom:0">
+        <b>💡 实在没有卡也行</b>
+        直接买单程票，或用 iPhone 的 Suica。短期游客不一定非要纠结实体卡。
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">② 三家不同的公司</h3>
+      <table>
+        <tr><th>公司</th><th>代表线路</th><th>说明</th></tr>
+        <tr><td>JR（日本铁路）</td><td>山手线、中央线</td><td>绕城主力。山手线是个环，串起新宿/涩谷/东京/上野</td></tr>
+        <tr><td>东京 Metro</td><td>银座线、丸之内线</td><td>市区密集，和都营共用「地铁券」</td></tr>
+        <tr><td>都营</td><td>大江户线、浅草线</td><td>和 Metro 属不同公司，换乘常有优惠</td></tr>
+        <tr><td>私铁</td><td>小田急、京王、东急</td><td>去箱根/镰仓/横滨等近郊会用到</td></tr>
+      </table>
+      <div class="note" style="margin-bottom:0">
+        <b>关键概念：直通运转</b>
+        有些线路会"跨公司直通"（比如地铁开到私铁线上去）。
+        <b>不用下车换乘</b>，但票价按实际乘坐的全程算——刷卡会自动算好，买票的话要留意。
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">③ 换乘与找路</h3>
+      <p>东京的大站（新宿、东京、涩谷）本身就是迷宫，<b>出站口有几十个</b>。实用做法：</p>
+      <ul style="margin:12px 0 0 20px">
+        <li>用 <b>Google Maps</b> 查路线，它会告诉你"坐几号车、在几号站台、从哪个出口出"</li>
+        <li>看 <b>站内编号</b>：出口都是字母+数字（如 <span class="kbd">A7</span>），跟着指示牌走</li>
+        <li>记住目的地对应的<b>出口编号</b>再出站，能少走十几分钟</li>
+        <li>大站里找"<b>みどりの窓口</b>"（绿色窗口）= 人工服务台，可以问路</li>
+      </ul>
+    </div>
+
+    <div class="note warn">
+      <b>⚠️ 走路量：真实数据</b>
+      东京游一天轻松走到 <b>1.5 万–2 万步（约 10–13 公里）</b>，而且大量是站内换乘。
+      这不是夸张——很多人第二天脚就废了。所以：<b>鞋一定要好走</b>，行程别排太满。
+    </div>
+  </section>
+
+  <!-- ============ 钱 ============ -->
+  <section id="money">
+    <h2>钱：现金、卡和免税</h2>
+    <p class="lead">日本"看起来无现金"，但很多地方只认现金。</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3 style="margin-top:0">支付方式优先级</h3>
+        <table>
+          <tr><th>场景</th><th>推荐</th></tr>
+          <tr><td>便利店</td><td>几乎都支持微信/支付宝</td></tr>
+          <tr><td>大型百货、药妆店</td><td>信用卡 / 银联 / 支付宝皆可</td></tr>
+          <tr><td>连锁餐饮</td><td>刷卡或现金</td></tr>
+          <tr><td>小馆子、老店</td><td><b>只能现金</b>（很多店门口有自助点餐机，收现金）</td></tr>
+          <tr><td>寺庙、神社、御守</td><td><b>只收现金</b></td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">现金怎么准备</h3>
+        <ul style="margin-left:20px">
+          <li>国内换好 <b>3–5 万日元</b>（约 ¥1500–2500）打底</li>
+          <li>日本便利店 <b>ATM 可银联取现</b>（7-11 的最稳），手续费几百日元</li>
+          <li>尽量<b>不要用大钞</b>买小东西，小店会不方便</li>
+          <li>零钱会越来越多，带个小零钱包很实用</li>
+        </ul>
+        <div class="note ok" style="margin:14px 0 0">
+          <b>💡 手数料（手续费）</b>
+          取现时 ATM 会显示。7-11 一般 110–220 日元/次，取一次多一点更划算。
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">免税（Tax-Free）</h3>
+      <table>
+        <tr><th>项目</th><th>规则</th></tr>
+        <tr><td>起征金额</td><td>同一家店当天<b>满 5000 日元（不含税）</b></td></tr>
+        <tr><td>消耗品</td><td>化妆品、食品、药品等。<b>会被封袋，离境前不要拆</b></td></tr>
+        <tr><td>一般品</td><td>衣服、电器、包等，不封袋，可当场用</td></tr>
+        <tr><td>所需证件</td><td><b>护照原件</b>（必须本人持护照，复印件不行）</td></tr>
+        <tr><td>办理地点</td><td>店内免税柜台（不是机场）</td></tr>
+      </table>
+      <div class="note warn" style="margin-bottom:0">
+        <b>⚠️ 两个容易踩的坑</b>
+        ① 消耗品和一般品<b>金额不能合并计算</b>（要各自满 5000）。
+        ② 免税商品<b>不能在日本境内消费</b>，尤其是封袋的食品化妆品——拆了可能被要求补税。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 预算 ============ -->
+  <section id="budget">
+    <h2>预算估算</h2>
+    <p class="lead">按人数和天数实时算。单位：人民币（汇率默认 1 日元 ≈ 0.048 元，可自行调整）。</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3 style="margin-top:0">人数与天数</h3>
+        <div class="calc-row"><label>出行人数</label><input type="number" id="people" value="2" min="1" max="20" inputmode="numeric"></div>
+        <div class="calc-row"><label>停留天数</label><input type="number" id="days" value="5" min="1" max="60" inputmode="numeric"></div>
+        <div class="calc-row"><label>汇率（1 日元 = ? 元）</label><input type="number" id="rate" value="0.048" step="0.001" min="0.01" inputmode="decimal"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">日均单人开销（日元）</h3>
+        <div class="calc-row"><label>住宿 / 晚</label><input type="number" id="hotel" value="9000" step="500" inputmode="numeric"></div>
+        <div class="calc-row"><label>餐饮 / 天</label><input type="number" id="food" value="4500" step="500" inputmode="numeric"></div>
+        <div class="calc-row"><label>交通 / 天</label><input type="number" id="trans" value="1200" step="100" inputmode="numeric"></div>
+        <div class="calc-row"><label>门票景点 / 天</label><input type="number" id="ticket" value="1500" step="500" inputmode="numeric"></div>
+        <div class="calc-row"><label>购物 / 天</label><input type="number" id="shop" value="4000" step="500" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">明细</h3>
+      <table id="bdetail">
+        <tr><th>项目</th><th>单人/天（元）</th><th>合计（元）</th></tr>
+      </table>
+      <div class="total">
+        <div>预计总花费<br><small id="percap">—</small></div>
+        <div class="num" id="btotal">—</div>
+      </div>
+      <div class="note" style="margin-bottom:0">
+        <b>参考量级（单人 5 天）</b>
+        省着花 ≈ 4000–6000 元；正常玩 ≈ 7000–10000 元；加机票（往返 2000–4000 元）另算。
+        购物是最大变量，上面默认值只是日常水平。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 行程 ============ -->
+  <section id="plan">
+    <h2>5 天参考行程</h2>
+    <p class="lead">按"每天一个片区"排，减少来回坐车。可自由打乱。</p>
+
+    <div class="day">
+      <span class="pt"></span>
+      <div class="when">DAY 1 · 抵达 + 浅草</div>
+      <h4>落地适应，轻装上阵</h4>
+      <p>成田/羽田入境 → 买/加交通卡 → 到酒店放行李 → <b>浅草寺 + 仲见世商店街</b> → 隅田川边散步看晴空塔夜景。</p>
+      <p style="margin-top:8px;color:var(--sub);font-size:13px">第一天别排太满。入境 + 找路 + 换乘很耗神，晚上能走到浅草就够了。</p>
+    </div>
+
+    <div class="day">
+      <span class="pt"></span>
+      <div class="when">DAY 2 · 上野 + 秋叶原</div>
+      <h4>博物馆、公园、电器城</h4>
+      <p><b>上野公园</b>（博物馆群、动物园、不忍池）→ 阿美横町商店街 → <b>秋叶原</b> 电器/动漫街 → 晚上可去 <b>东京站</b> 看红砖站房。</p>
+      <p style="margin-top:8px;color:var(--sub);font-size:13px">上野和秋叶原只隔一站，串起来很顺。买电器记得比价，免税要带护照。</p>
+    </div>
+
+    <div class="day">
+      <span class="pt"></span>
+      <div class="when">DAY 3 · 涩谷 + 原宿 + 表参道</div>
+      <h4>潮流区一整天</h4>
+      <p><b>明治神宫</b>（早上人少）→ <b>原宿</b> 竹下通 → <b>表参道</b> 品牌街 → <b>涩谷</b> 十字路口、SHIBUYA SKY 观景台（需预约）。</p>
+      <p style="margin-top:8px;color:var(--sub);font-size:13px">SHIBUYA SKY 建议提前网上订票，日落时段最抢手。这一片走路量很大。</p>
+    </div>
+
+    <div class="day">
+      <span class="pt"></span>
+      <div class="when">DAY 4 · 新宿 + 中野</div>
+      <h4>都厅免费展望 + 老街</h4>
+      <p><b>新宿御苑</b> → <b>东京都厅展望室</b>（免费！）→ 歌舞伎町 → 下午去 <b>中野百老汇</b>（二手动漫周边）或 <b>高円寺</b>（古着）。</p>
+      <p style="margin-top:8px;color:var(--sub);font-size:13px">都厅展望室免费且视野好，性价比极高。新宿站真的很绕，预留找路时间。</p>
+    </div>
+
+    <div class="day">
+      <span class="pt"></span>
+      <div class="when">DAY 5 · 机动 / 近郊</div>
+      <h4>缓冲一天</h4>
+      <p>选一个：<b>镰仓</b>（大佛 + 江之电，约 1 小时）、<b>横滨</b>（港未来、中华街）、或 <b>台场</b>（海滨、高达、购物）。</p>
+      <p style="margin-top:8px;color:var(--sub);font-size:13px">留一天机动很必要——前几天没逛完的、想回购的，都放这天。</p>
+    </div>
+
+    <div class="note ok">
+      <b>💡 排行程的原则</b>
+      每天锁定<b>一个片区</b>，别东一个西一个。东京地铁单程动辄 20–30 分钟，
+      来回横跳会白白吃掉两小时。
+    </div>
+  </section>
+
+  <!-- ============ 日语 ============ -->
+  <section id="jp">
+    <h2>应急日语</h2>
+    <p class="lead">不需要会日语，但会这几句体验差别很大。照着念就行，小字是发音。</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3 style="margin-top:0">基本礼貌</h3>
+        <div class="phrase"><div><div class="jp">すみません</div><div class="ro">su-mi-ma-sen</div></div><div class="cn">不好意思 / 打扰一下<br><small>万能句，叫服务员、问路都用</small></div></div>
+        <div class="phrase"><div><div class="jp">ありがとうございます</div><div class="ro">a-ri-ga-to-u go-za-i-ma-su</div></div><div class="cn">谢谢</div></div>
+        <div class="phrase"><div><div class="jp">お願いします</div><div class="ro">o-ne-gai-shi-ma-su</div></div><div class="cn">拜托了 / 麻烦了</div></div>
+        <div class="phrase"><div><div class="jp">大丈夫です</div><div class="ro">dai-jou-bu de-su</div></div><div class="cn">不用了 / 没关系<br><small>拒绝推销时很好用</small></div></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">实用场景</h3>
+        <div class="phrase"><div><div class="jp">いくらですか</div><div class="ro">i-ku-ra de-su-ka</div></div><div class="cn">多少钱？</div></div>
+        <div class="phrase"><div><div class="jp">英語は話せますか</div><div class="ro">ei-go wa ha-na-se-ma-su-ka</div></div><div class="cn">会说英语吗？</div></div>
+        <div class="phrase"><div><div class="jp">カードは使えますか</div><div class="ro">ka-a-do wa tsu-ka-e-ma-su-ka</div></div><div class="cn">能刷卡吗？</div></div>
+        <div class="phrase"><div><div class="jp">写真を撮ってもいいですか</div><div class="ro">sha-shin o tot-te mo ii de-su-ka</div></div><div class="cn">可以拍照吗？</div></div>
+        <div class="phrase"><div><div class="jp">トイレはどこですか</div><div class="ro">to-i-re wa do-ko de-su-ka</div></div><div class="cn">洗手间在哪？</div></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>其实用不上也没关系</b>
+      日本服务业对外国游客很习惯。实在沟通不了，<b>掏手机打翻译</b>或<b>比划 + 手势</b>都能解决。
+      真正需要沟通的场合（点餐、买东西）大多有图或自助机。
+    </div>
+  </section>
+
+  <!-- ============ 避坑 ============ -->
+  <section id="trap">
+    <h2>避坑清单</h2>
+    <p class="lead">这些都是"没人事先告诉你、到了才知道"的事。</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3 style="margin-top:0">🔴 一定会踩的</h3>
+        <ul style="margin-left:20px">
+          <li><b>垃圾桶找不到</b>：街上几乎没有。垃圾自己带回酒店，或在便利店丢</li>
+          <li><b>走路走到崩溃</b>：日均 1.5–2 万步是常态。鞋选错，后面几天都废</li>
+          <li><b>大站迷宫</b>：新宿站有 200 多个出口。跟着 Google Maps 的出口编号走</li>
+          <li><b>现金不够</b>：小馆子、老店、神社只收现金。至少备 3 万日元</li>
+          <li><b>店里禁止饮食</b>：边走边吃在很多地方不礼貌</li>
+          <li><b>地铁券不含 JR</b>：买了 24 小时券却发现主要坐山手线</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">🟡 容易忽略的</h3>
+        <ul style="margin-left:20px">
+          <li><b>电车很准时，但末班车早</b>：多数线路 24:00 前后收班</li>
+          <li><b>排队文化</b>：扶手电梯左侧站立（关东），右侧通行</li>
+          <li><b>不给小费</b>：日本没有小费文化，给了反而尴尬</li>
+          <li><b>垃圾分类</b>：可燃/不可燃/瓶罐要分开</li>
+          <li><b>泡温泉要先洗身</b>：进池前必须冲洗，毛巾别泡进池里</li>
+          <li><b>居酒屋"お通し"</b>：上小菜会自动收费，属正常</li>
+          <li><b>药妆店比价</b>：同一条街价格能差 20%</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note warn">
+      <b>⚠️ 关于拍照</b>
+      很多店铺、神社、展馆<b>禁止拍照</b>（有明确标识）。
+      拍路人、特别是拍小孩，要格外注意——日本对肖像权比较敏感。
+      不确定就先问 <span class="kbd">写真を撮ってもいいですか</span>。
+    </div>
+  </section>
+
+  <!-- ============ 行前清单 ============ -->
+  <section id="check">
+    <h2>出发前最终核对</h2>
+    <p class="lead">出发前一晚照着过一遍。</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3 style="margin-top:0">证件与钱</h3>
+        <ul class="check" data-key="final1">
+          <li><span class="box"></span><span class="txt">护照（原件）</span></li>
+          <li><span class="box"></span><span class="txt">机票行程单（截图）</span></li>
+          <li><span class="box"></span><span class="txt">酒店预订确认（截图）</span></li>
+          <li><span class="box"></span><span class="txt">日元现金</span></li>
+          <li><span class="box"></span><span class="txt">信用卡（开通境外）</span></li>
+          <li><span class="box"></span><span class="txt">保险单（如有）</span></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">电子与随身</h3>
+        <ul class="check" data-key="final2">
+          <li><span class="box"></span><span class="txt">eSIM 已激活 / WiFi 已租</span></li>
+          <li><span class="box"></span><span class="txt">Google Maps 已下载离线地图</span></li>
+          <li><span class="box"></span><span class="txt">翻译 App 已装</span></li>
+          <li><span class="box"></span><span class="txt">充电宝（随身）</span></li>
+          <li><span class="box"></span><span class="txt">转换插头</span></li>
+          <li><span class="box"></span><span class="txt">舒适的鞋（最重要）</span></li>
+          <li><span class="box"></span><span class="txt">常用药</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<button id="top" aria-label="回到顶部">↑</button>
+
+<footer>
+  东京实用攻略 · 本地静态页面，双击即可打开，无需联网<br>
+  <span style="opacity:.7">数据为经验参考值，出行前请以官方信息为准 · 打勾状态保存在本机浏览器里</span>
+</footer>
+
+<script>
+(function(){
+  /* ---------- 导航 ---------- */
+  const tabs = [
+    ['prep','出发前'], ['traffic','交通'], ['money','钱与免税'],
+    ['budget','预算'], ['plan','行程'], ['jp','日语'], ['trap','避坑'], ['check','核对清单']
+  ];
+  const nav = document.getElementById('nav');
+  tabs.forEach(([id,label],i)=>{
+    const b=document.createElement('button');
+    b.textContent=label; b.dataset.target=id;
+    if(i===0) b.classList.add('on');
+    b.onclick=()=>{
+      document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+      document.querySelectorAll('main section').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      document.getElementById(id).classList.add('on');
+      // 移动端把选中的标签滚进视野
+      if(b.scrollIntoView){ try{ b.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'}); }catch(e){} }
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+    nav.appendChild(b);
+  });
+
+  /* ---------- 打勾清单（localStorage 持久化） ---------- */
+  document.querySelectorAll('.check').forEach(list=>{
+    const key = 'jpguide:' + (list.dataset.key || 'default');
+    let saved = {};
+    try{ saved = JSON.parse(localStorage.getItem(key) || '{}'); }catch(e){}
+    [...list.children].forEach((li,i)=>{
+      if(saved[i]) li.classList.add('done');
+      li.onclick=()=>{
+        li.classList.toggle('done');
+        saved[i]=li.classList.contains('done');
+        try{ localStorage.setItem(key,JSON.stringify(saved)); }catch(e){}
+      };
+    });
+  });
+
+  /* ---------- 预算计算 ---------- */
+  const ids=['people','days','rate','hotel','food','trans','ticket','shop'];
+  const el={}; ids.forEach(i=>el[i]=document.getElementById(i));
+  const detail=document.getElementById('bdetail');
+  const rows=[['住宿','hotel'],['餐饮','food'],['交通','trans'],['门票景点','ticket'],['购物','shop']];
+
+  function calc(){
+    const people=Math.max(1,+el.people.value||1);
+    const days  =Math.max(1,+el.days.value||1);
+    const rate  =+el.rate.value||0.048;
+
+    [...detail.querySelectorAll('tr.bodyrow')].forEach(r=>r.remove());
+    let perPersonDayAll=0;
+
+    rows.forEach(([label,key])=>{
+      const yen=+el[key].value||0;
+      const cny=yen*rate;
+      const total=cny*days*people;
+      perPersonDayAll+=cny;
+      const tr=document.createElement('tr');
+      tr.className='bodyrow';
+      tr.innerHTML='<td>'+label+'</td><td>¥'+cny.toFixed(0)+'</td><td>¥'+total.toFixed(0)+'</td>';
+      detail.appendChild(tr);
+    });
+
+    const grand = perPersonDayAll*days*people;
+    document.getElementById('btotal').textContent='¥'+grand.toFixed(0);
+    document.getElementById('percap').textContent=
+      '单人 ¥'+(perPersonDayAll*days).toFixed(0)+' · '+people+' 人 × '+days+' 天';
+  }
+  ids.forEach(i=>{ el[i].addEventListener('input',calc); });
+  calc();
+
+  /* ---------- 回到顶部 ---------- */
+  const topBtn=document.getElementById('top');
+  window.addEventListener('scroll',()=>{
+    topBtn.classList.toggle('show', window.scrollY>420);
+  },{passive:true});
+  topBtn.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+})();
+</script>
+</body>
+</html>
